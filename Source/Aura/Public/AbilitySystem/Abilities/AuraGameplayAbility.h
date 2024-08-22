@@ -1,0 +1,23 @@
+// Copyright Jordan McWilliams
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Abilities/GameplayAbility.h"
+#include "AuraGameplayAbility.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class AURA_API UAuraGameplayAbility : public UGameplayAbility
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	FGameplayTag StartupGameplayTag;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Damage")
+	FScalableFloat Damage;
+	
+};
