@@ -1,3 +1,6 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=545DC4EE_002DF5D5_002DFC0D_002D8ABD_002D49A97D15E1E2_002Fd_003APrivate_002Fd_003AAbilitySystem_002Fd_003AAbilities_002Ff_003AAuraProjectileSpell_002Ecpp/@EntryIndexedValue">ForceIncluded</s:String>
-	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=B4EA9473_002DC660_002DAB25_002DD47F_002DC7E41F68FC42_002Fd_003APrivate_002Ff_003AAbilitySystemComponent_002Ecpp/@EntryIndexedValue">ForceIncluded</s:String></wpf:ResourceDictionary>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=B4EA9473_002DC660_002DAB25_002DD47F_002DC7E41F68FC42_002Fd_003APrivate_002Ff_003AAbilitySystemComponent_002Ecpp/@EntryIndexedValue">ForceIncluded</s:String>
+	
+	
+	<s:String x:Key="/Default/CodeInspection/Highlighting/AnalysisEnabled/@EntryValue">SOLUTION</s:String></wpf:ResourceDictionary>

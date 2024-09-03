@@ -8,6 +8,8 @@
 #include "GameplayEffectExtension.h"
 #include "GameFramework/Character.h"
 #include "AuraGameplayTags.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Game/AuraGameModeBase.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerController.h"
@@ -39,7 +41,12 @@ void UAuraAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	/* Vital Attributes*/
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, Health, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, Mana, COND_None, REPNOTIFY_Always);
-	
+
+	/* Resistance Attributes */
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, FireResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, LightningResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, ArcaneResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, PhysicalResistance, COND_None, REPNOTIFY_Always);
 }
 
 void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
@@ -80,14 +87,11 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 	}
 }
 
-void UAuraAttributeSet::ShowFloatingText(const FFullEffectProperties& Props, const float Damage) const
+void UAuraAttributeSet::ShowFloatingText(const FFullEffectProperties& Props, const float Damage, const bool bIsBlockedHit, const bool bIsCriticalHit) const
 {
-	if (Props.TargetProps->Character != Props.SrcProps->Character)
+	for (AAuraPlayerController* AuraPlayerController: Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(Props.SrcProps->Character.Get()))->GetAllPlayerControllers())
 	{
-		if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(UGameplayStatics::GetPlayerController(Props.SrcProps->Character.Get(), 0)))
-		{
-			AuraPlayerController->ShowDamageNumber(Damage, Props.TargetProps->Character.Get());
-		}
+		AuraPlayerController->ShowDamageNumber(Damage, Props.TargetProps->Character.Get(), bIsBlockedHit, bIsCriticalHit);
 	}
 }
 
@@ -108,25 +112,25 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	{
 		const float LocalIncomingDamage = GetIncomingDamage();
 		SetIncomingDamage(0.f);
-		if (LocalIncomingDamage > 0.f)
+		if (LocalIncomingDamage <= 0.f) return;
+		const float NewHealth = GetHealth() - LocalIncomingDamage;
+		SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
+		
+		if (NewHealth > 0.f)
 		{
-			const float NewHealth = GetHealth() - LocalIncomingDamage;
-			SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
-			
-			if (NewHealth > 0.f)
+			//Hit React
+			const FGameplayTagContainer Tags(FAuraGameplayTags::Get().Effects_HitReact);
+			Props.TargetProps->ASC->TryActivateAbilitiesByTag(Tags);
+		} else
+		{
+			if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetProps->AvatarActor))
 			{
-				//Hit React
-				const FGameplayTagContainer Tags(FAuraGameplayTags::Get().Effects_HitReact);
-				Props.TargetProps->ASC->TryActivateAbilitiesByTag(Tags);
-			} else
-			{
-				if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetProps->AvatarActor))
-				{
-					CombatInterface->Die();
-				}
+				CombatInterface->Die();
 			}
-			ShowFloatingText(Props, LocalIncomingDamage);
 		}
+		const bool bBlock = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
+		const bool bCriticalHit = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
+		ShowFloatingText(Props, LocalIncomingDamage, bBlock, bCriticalHit);
 	}
 }
 
@@ -209,5 +213,25 @@ void UAuraAttributeSet::OnRep_HealthRegeneration(const FGameplayAttributeData& O
 void UAuraAttributeSet::OnRep_ManaRegeneration(const FGameplayAttributeData& OldManaRegeneration) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, ManaRegeneration, OldManaRegeneration);
+}
+
+void UAuraAttributeSet::OnRep_FireResistance(const FGameplayAttributeData& OldFireResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, FireResistance, OldFireResistance);
+}
+
+void UAuraAttributeSet::OnRep_LightningResistance(const FGameplayAttributeData& OldLightningResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, LightningResistance, OldLightningResistance);
+}
+
+void UAuraAttributeSet::OnRep_ArcaneResistance(const FGameplayAttributeData& OldArcaneResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, ArcaneResistance, OldArcaneResistance);
+}
+
+void UAuraAttributeSet::OnRep_PhysicalResistance(const FGameplayAttributeData& OldPhysicalResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, PhysicalResistance, OldPhysicalResistance);
 }
 

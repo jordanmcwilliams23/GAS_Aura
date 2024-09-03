@@ -5,8 +5,10 @@
 #include "AbilitySystemComponent.h"
 #include "GameplayEffectTypes.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AAuraCharacterBase::AAuraCharacterBase()
 {
@@ -29,6 +31,15 @@ UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
+void AAuraCharacterBase::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void AAuraCharacterBase::InitAbilityActorInfo()
+{
+}
+
 UAnimMontage* AAuraCharacterBase::GetHitReactMontage_Implementation() const
 {
 	return HitReactMontage;
@@ -42,6 +53,8 @@ void AAuraCharacterBase::Die()
 
 void AAuraCharacterBase::MulticastHandleDeath_Implementation()
 {
+	UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation(), GetActorRotation());
+	bIsDead = true;
 	Weapon->SetSimulatePhysics(true);
 	Weapon->SetEnableGravity(true);
 	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
@@ -55,20 +68,34 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation()
 	Dissolve();
 }
 
-void AAuraCharacterBase::BeginPlay()
+FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag& Tag)
 {
-	Super::BeginPlay();
-	
+	return UAuraAbilitySystemLibrary::GetCombatSocketLocation(this, Tag);
 }
 
-void AAuraCharacterBase::InitAbilityActorInfo()
+bool AAuraCharacterBase::IsDead_Implementation() const
 {
+	return bIsDead;
 }
 
-FVector AAuraCharacterBase::GetCombatSocketLocation()
+AActor* AAuraCharacterBase::GetAvatar_Implementation()
 {
-	check(Weapon);
-	return Weapon->GetSocketLocation(WeaponTipSocketName);
+	return this;
+}
+
+TArray<FTaggedMontage> AAuraCharacterBase::GetAttackMontages_Implementation()
+{
+	return AttackMontages;
+}
+
+FTaggedMontage AAuraCharacterBase::GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag)
+{
+	for (FTaggedMontage& TaggedMontage: AttackMontages)
+	{
+		if (TaggedMontage.MontageTag == MontageTag)
+			return TaggedMontage;
+	}
+	return FTaggedMontage();
 }
 
 void AAuraCharacterBase::ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Effect, float Level) const
@@ -93,6 +120,11 @@ void AAuraCharacterBase::InitializeDefaultAttributes() const
 	ApplyEffectToSelf(DefaultPrimaryAttributes, 1.f);
 	ApplyEffectToSelf(DefaultSecondaryAttributes, 1.f);
 	ApplyEffectToSelf(DefaultVitalAttributes, 1.f);
+}
+
+UNiagaraSystem* AAuraCharacterBase::GetBloodEffect_Implementation()
+{
+	return BloodSystem;
 }
 
 void AAuraCharacterBase::Dissolve()

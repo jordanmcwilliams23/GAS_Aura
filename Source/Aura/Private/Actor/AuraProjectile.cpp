@@ -9,8 +9,8 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Aura.h"
-#include "Components/AudioComponent.h"
 
 AAuraProjectile::AAuraProjectile()
 {
@@ -36,7 +36,14 @@ void AAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AAuraProjectile::OnSphereOverlap);
-	LoopingSoundComponent = UGameplayStatics::SpawnSoundAttached(LoopingSpawnSound, GetRootComponent());
+	UGameplayStatics::SpawnSoundAttached(
+		LoopingSpawnSound,
+		GetRootComponent(),
+		NAME_None,
+		FVector(ForceInit),
+		FRotator::ZeroRotator,
+		EAttachLocation::KeepRelativeOffset,
+		true);
 	SetLifeSpan(LifeSpan);
 }
 
@@ -46,6 +53,7 @@ void AAuraProjectile::Destroyed()
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+		bHit = true;
 	}
 	Super::Destroyed();
 }
@@ -53,9 +61,14 @@ void AAuraProjectile::Destroyed()
 void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& HitResult)
 {
-	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
-	LoopingSoundComponent->Stop();
+	//Don't hit owning actor or actors on same team
+	if (OtherActor == GetOwner() || !UAuraAbilitySystemLibrary::IsNotFriend(GetOwner(), OtherActor)) return;
+	if (!bHit)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+		bHit = true;
+	}
 
 	if (HasAuthority())
 	{
