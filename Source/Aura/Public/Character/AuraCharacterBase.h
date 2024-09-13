@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
+#include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
 
@@ -13,6 +14,8 @@ class UGameplayEffect;
 class UAbilitySystemComponent;
 class UAttributeSet;
 class UAnimMontage;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCharacterDiedSignature, class AAuraCharacterBase*, DeadCharacter);
 
 UCLASS(Abstract)
 class AURA_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface, public ICombatInterface
@@ -33,6 +36,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	USkeletalMeshComponent* GetWeapon() const {return Weapon;}
+
+	UPROPERTY(BlueprintAssignable)
+	FOnCharacterDiedSignature CharacterDied;
 protected:
 	virtual void BeginPlay() override;
 	virtual void InitAbilityActorInfo();
@@ -50,6 +56,9 @@ protected:
 	virtual AActor* GetAvatar_Implementation() override;
 	virtual TArray<FTaggedMontage> GetAttackMontages_Implementation() override;
 	virtual FTaggedMontage GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag) override;
+	virtual int32 GetMinionCount_Implementation() const override;
+	virtual void IncrementMinionCount_Implementation(const int32 Amount) override;
+	virtual ECharacterClass GetCharacterClass_Implementation() override;
 	/* End Combat Interface */
 	
 	UPROPERTY()
@@ -57,6 +66,9 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character Class Defaults")
+	ECharacterClass CharacterClass = ECharacterClass::Warrior;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category= "Attributes")
 	TSubclassOf<UGameplayEffect> DefaultPrimaryAttributes;
@@ -95,9 +107,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	USoundBase* DeathSound;
 
+	/* Minions */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int32 MinionCount = 0;
+
 private:
 	UPROPERTY(EditAnywhere, Category="Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
+
+	UPROPERTY(EditAnywhere, Category="Abilities")
+	TArray<TSubclassOf<UGameplayAbility>> StartupPassiveAbilities;
 
 	UPROPERTY(EditAnywhere, Category="Abilities")
 	TObjectPtr<UAnimMontage> HitReactMontage;

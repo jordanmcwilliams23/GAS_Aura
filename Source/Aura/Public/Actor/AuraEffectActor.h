@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "GameplayEffectTypes.h"
 #include "AuraEffectActor.generated.h"
 
 class UAbilitySystemComponent;

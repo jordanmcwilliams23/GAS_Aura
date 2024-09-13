@@ -1,4 +1,4 @@
-// Copyright Jordan McWilliams
+ // Copyright Jordan McWilliams
 
 #pragma once
 

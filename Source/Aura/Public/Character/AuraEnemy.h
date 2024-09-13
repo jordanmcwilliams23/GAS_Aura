@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/AuraCharacterBase.h"
 #include "Interaction/TargetInterface.h"
-#include "UI/WidgetController/OverlayWidgetController.h"
+#include "Aura/AuraTypes.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "AuraEnemy.generated.h"
 
@@ -30,7 +30,7 @@ public:
 	/** End Target Interface */
 
 	/** Combat Interface */
-	virtual int32 GetCharacterLevel() override;
+	virtual int32 GetCharacterLevel_Implementation() override;
 	virtual void Die() override;
 	/** End Combat Interface */
 
@@ -56,16 +56,14 @@ protected:
 	virtual void InitAbilityActorInfo() override;
 
 	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
-	FOnAttributeChangedSignature OnHealthChanged;
+	FOnFloatChangedSignatureDyn OnHealthChanged;
 	
 	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
-	FOnAttributeChangedSignature OnMaxHealthChanged;
+	FOnFloatChangedSignatureDyn OnMaxHealthChanged;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character Class Defaults")
 	int32 Level = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character Class Defaults")
-	ECharacterClass CharacterClass = ECharacterClass::Warrior;
+	
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UWidgetComponent> HealthBarWidget;

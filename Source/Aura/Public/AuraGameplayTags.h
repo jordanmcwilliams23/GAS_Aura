@@ -48,8 +48,13 @@ public:
 	FGameplayTag Attributes_Secondary_MaxHealth;
 	FGameplayTag Attributes_Secondary_MaxMana;
 	/* End Secondary Attributes */
+	
+	/* Meta Attributes */
+	FGameplayTag Attributes_Meta_IncomingXP;
+	/* End Meta Attributes */
 
 	/* Input Tags */
+	FGameplayTag InputTag;
 	FGameplayTag InputTag_LMB;
 	FGameplayTag InputTag_RMB;
 	FGameplayTag InputTag_1;
@@ -68,7 +73,17 @@ public:
 
 	/* End Damage Types & Resistances */
 
+	/* Ability Tags */
+	FGameplayTag Abilities;
 	FGameplayTag Abilities_Attack;
+	FGameplayTag Abilities_Summon;
+
+	FGameplayTag Abilities_Fire_FireBolt;
+	/* End Ability Tags */
+
+	/* Data Tags */
+	FGameplayTag Data_Cooldown;
+	/* End Data Tags */
 
 	/* Combat Socket Tags */
 	

@@ -94,8 +94,17 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	AActor* SourceAvatar = SourceASC ? SourceASC->GetAvatarActor() : nullptr;
 	AActor* TargetAvatar = TargetASC ? TargetASC->GetAvatarActor() : nullptr;
-	ICombatInterface* SourceCombatInterface = Cast<ICombatInterface>(SourceAvatar);
-	ICombatInterface* TargetCombatInterface = Cast<ICombatInterface>(TargetAvatar);
+
+	int32 SourceLevel = 1;
+	if (SourceAvatar->Implements<UCombatInterface>())
+	{
+		SourceLevel = ICombatInterface::Execute_GetCharacterLevel(SourceAvatar);
+	}
+	int32 TargetLevel = 1;
+	if (TargetAvatar->Implements<UCombatInterface>())
+	{
+		TargetLevel = ICombatInterface::Execute_GetCharacterLevel(TargetAvatar);
+	}
 
 	const FGameplayEffectSpec& OwningSpec = ExecutionParams.GetOwningSpec();
 	FGameplayEffectContextHandle EffectContextHandle = OwningSpec.GetContext();
@@ -109,8 +118,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	//Get Damage Set by caller
 	float Damage = 0.f;
-	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances = FAuraGameplayTags::Get().DamageTypesToResistances;
-	for (const TTuple<FGameplayTag, FGameplayTag>& Pair: DamageTypesToResistances)
+	for (TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances = FAuraGameplayTags::Get().DamageTypesToResistances; const TTuple<FGameplayTag, FGameplayTag>& Pair: DamageTypesToResistances)
 	{
 		const FGameplayTag DamageTypeTag = Pair.Key;
 		const FGameplayTag ResistanceTag = Pair.Value;
@@ -147,11 +155,11 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	float SourceArmorPen = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().ArmorPenetrationDef, EvaluateParameters, SourceArmorPen);
 	SourceArmorPen = FMath::Clamp(TargetArmor, 0.f, SourceArmorPen);
-	const float ArmorPenCoefficient = ArmorPenCurve->Eval(SourceCombatInterface->GetCharacterLevel());
+	const float ArmorPenCoefficient = ArmorPenCurve->Eval(SourceLevel);
 
 	//Effective Armor Calculation
 	const FRealCurve* EffectiveArmorCoefficientCurve = CharacterClassInfo->DamageCalculationCoefficients->FindCurve(FName("EffectiveArmor"), FString());
-	const float EffectiveArmorCoefficient = EffectiveArmorCoefficientCurve->Eval(TargetCombatInterface->GetCharacterLevel());
+	const float EffectiveArmorCoefficient = EffectiveArmorCoefficientCurve->Eval(TargetLevel);
 	const float EffectiveArmor = TargetArmor * (100.f - SourceArmorPen * ArmorPenCoefficient) / 100.f;
 	Damage *= (100.f - EffectiveArmor * EffectiveArmorCoefficient) / 100.f;
 
@@ -164,7 +172,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	TargetCriticalHitResistance = FMath::Clamp(TargetCriticalHitResistance, 0.f, TargetCriticalHitResistance);
 
 	const FRealCurve* CriticalHitResistanceCoefficientCurve = CharacterClassInfo->DamageCalculationCoefficients->FindCurve(FName("CriticalHitResistance"), FString());
-	const float CriticalHitResistanceCoefficient = CriticalHitResistanceCoefficientCurve->Eval(TargetCombatInterface->GetCharacterLevel());
+	const float CriticalHitResistanceCoefficient = CriticalHitResistanceCoefficientCurve->Eval(TargetLevel);
 	const float EffectiveCriticalHitChance = SourceCriticalHitChance - TargetCriticalHitResistance * CriticalHitResistanceCoefficient;
 
 	//Check if it was a crit

@@ -12,8 +12,10 @@
 #include "UI/HUD/AuraHUD.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "AuraAbilityTypes.h"
+#include "AuraGameplayTags.h"
 #include "Character/AuraCharacterBase.h"
 #include "Player/AuraPlayerController.h"
+#include "AbilitySystem/Data/LevelUpInfo.h"
 
 UOverlayWidgetController* UAuraAbilitySystemLibrary::GetOverlayWidgetController(const UObject* WorldContext)
 {
@@ -49,7 +51,7 @@ UAttributeMenuWidgetController* UAuraAbilitySystemLibrary::GetAttributeWidgetCon
 
 void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(const UObject* WorldContext, const ECharacterClass CharacterClass, const float Level, UAbilitySystemComponent* ASC)
 {
-	AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContext));
+	const AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContext));
 	if (AuraGameModeBase == nullptr) return;
 
 	const AActor* AvatarActor = ASC->GetAvatarActor();
@@ -83,11 +85,14 @@ void UAuraAbilitySystemLibrary::InitializeDefaultAbilities(const UObject* WorldC
 		ASC->GiveAbility(FGameplayAbilitySpec(Ability, 1));
 	}
 	//Class abilities
-	ICombatInterface* CombatInterface = Cast<ICombatInterface>(ASC->GetAvatarActor());
-	check(CombatInterface);
+	int32 Level = 1.f;
+	if (ASC->GetAvatarActor()->Implements<UCombatInterface>())
+	{
+		Level = ICombatInterface::Execute_GetCharacterLevel(ASC->GetAvatarActor());
+	}
 	for (const TSubclassOf<UGameplayAbility>& Ability: AuraGameModeBase->CharacterClassInfo->CharacterClassInformation[Class].ClassAbilities)
 	{
-		ASC->GiveAbility(FGameplayAbilitySpec(Ability, CombatInterface->GetCharacterLevel()));
+		ASC->GiveAbility(FGameplayAbilitySpec(Ability, Level));
 	}
 }
 
@@ -175,4 +180,10 @@ bool UAuraAbilitySystemLibrary::IsNotFriend(const AActor* FirstActor, const AAct
 TArray<AAuraPlayerController*> UAuraAbilitySystemLibrary::GetAllPlayerControllers(const AActor* WorldContextObject)
 {
 	return Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject))->GetAllPlayerControllers();
+}
+
+float UAuraAbilitySystemLibrary::GetXPAmount(const UObject* WorldContext, const ECharacterClass Class, const int Level)
+{
+	const AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContext));
+	return AuraGameModeBase->CharacterClassInfo->CharacterClassInformation[Class].XPAmount.GetValueAtLevel(Level);
 }

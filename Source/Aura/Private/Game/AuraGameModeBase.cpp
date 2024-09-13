@@ -4,6 +4,7 @@
 #include "Game/AuraGameModeBase.h"
 
 #include "Player/AuraPlayerController.h"
+#include "Player/AuraPlayerState.h"
 
 void AAuraGameModeBase::PostLogin(APlayerController* NewPlayer)
 {

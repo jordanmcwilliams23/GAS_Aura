@@ -38,9 +38,15 @@ void FAuraGameplayTags::InitializeNativeTags()
 	GameplayTags.Attributes_Secondary_MaxHealth = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attributes.Secondary.MaxHealth"),
 		FString("Maximum Amount of Health obtainable"));
 	GameplayTags.Attributes_Secondary_MaxMana = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attributes.Secondary.MaxMana"),
-		
 		FString("Maximum Amount of Mana obtainable"));
+
+	/* Meta Attributes */
+	GameplayTags.Attributes_Meta_IncomingXP = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attributes.Meta.IncomingXP"),
+			FString("Incoming XP meta tag"));
+	
 	/* Input Tags */
+	GameplayTags.InputTag = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag"),
+		FString("Input Tag Parent"));
 	GameplayTags.InputTag_LMB = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.LMB"),
 		FString("Input tag for left mouse button"));
 	GameplayTags.InputTag_RMB = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.RMB"),
@@ -64,9 +70,21 @@ void FAuraGameplayTags::InitializeNativeTags()
 	INITIALIZE_DAMAGE_AND_RESISTANCE_TYPE_TAGS(Physical);
 	GameplayTags.DamageTypes = UGameplayTagsManager::Get().RequestGameplayTagChildren(GameplayTags.Damage);
 
+	/* Ability Tags */
+	GameplayTags.Abilities = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities"),
+		FString("Ability Tag Parent"));
 	GameplayTags.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Attack"),
 		FString("Attack Ability Tag"));
+	GameplayTags.Abilities_Summon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Summon"),
+		FString("Summon Ability Tag"));
 
+	GameplayTags.Abilities_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Fire.FireBolt"),
+		FString("FireBolt Ability Tag"));
+
+	/* Data Tags */
+	GameplayTags.Data_Cooldown = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Data.Cooldown"),
+		FString("Cooldown Data Tag"));
+	
 	/* Combat Socket Tags */
 	GameplayTags.CombatSocket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Weapon"),
 		FString("Weapon"));

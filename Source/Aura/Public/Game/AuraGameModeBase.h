@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "AuraGameModeBase.generated.h"
 
+class ULevelUpInfo;
 class UCharacterClassInfo;
 class AAuraPlayerController;
 /**

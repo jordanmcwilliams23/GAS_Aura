@@ -23,35 +23,33 @@ struct FEffectProperties
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Transient)
-	TWeakObjectPtr<UAbilitySystemComponent> ASC;
-
-	UPROPERTY(Transient)
-	TWeakObjectPtr<AActor> AvatarActor;
-
-	UPROPERTY(Transient)
-	TWeakObjectPtr<AController> Controller;
-
-	UPROPERTY(Transient)
-	TWeakObjectPtr<ACharacter> Character;
-};
-
-USTRUCT()
-struct FFullEffectProperties
-{
-	GENERATED_BODY()
-
-	FFullEffectProperties()
-	{
-		SrcProps = MakeShared<FEffectProperties>();
-		TargetProps = MakeShared<FEffectProperties>();
-	}
+	FEffectProperties(){}
 	
 	FGameplayEffectContextHandle EffectContextHandle;
 
-	TSharedPtr<FEffectProperties> SrcProps;
+	UPROPERTY(Transient)
+	TObjectPtr<UAbilitySystemComponent> SourceASC;
 
-	TSharedPtr<FEffectProperties> TargetProps;
+	UPROPERTY(Transient)
+	TObjectPtr<AActor> SourceAvatarActor;
+
+	UPROPERTY(Transient)
+	TObjectPtr<AController> SourceController;
+
+	UPROPERTY(Transient)
+	TObjectPtr<ACharacter> SourceCharacter;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UAbilitySystemComponent> TargetASC;
+
+	UPROPERTY(Transient)
+	TObjectPtr<AActor> TargetAvatarActor;
+
+	UPROPERTY(Transient)
+	TObjectPtr<AController> TargetController;
+
+	UPROPERTY(Transient)
+	TObjectPtr<ACharacter> TargetCharacter;
 };
 
 UCLASS()
@@ -63,6 +61,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
+	void RefillVitalAttributes();
 
 	/* Primary Attributes */
 
@@ -155,6 +154,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Meta Attributes")
 	FGameplayAttributeData IncomingDamage;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, IncomingDamage);
+
+	UPROPERTY(BlueprintReadOnly, Category = "Meta Attributes")
+	FGameplayAttributeData IncomingXP;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, IncomingXP);
 	
 	/* Gameplay Attributes OnRep Functions */
 	UFUNCTION()
@@ -220,7 +223,8 @@ public:
 	/* End Gameplay Attributes OnRep Functions */
 	
 private:
-	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FFullEffectProperties& Props) const;
-	void ShowFloatingText(const FFullEffectProperties& Props, float Damage, bool bIsBlockedHit=false, bool bIsCriticalHit=false) const;
+	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
+	static void ShowFloatingText(const FEffectProperties& Props, float Damage, bool bIsBlockedHit=false, bool bIsCriticalHit=false);
+	void SendXPEvent(const FEffectProperties& FullEffectProperties) const;
 	
 };
