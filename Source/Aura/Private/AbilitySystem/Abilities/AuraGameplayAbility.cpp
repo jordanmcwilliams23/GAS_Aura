@@ -4,6 +4,7 @@
 #include "AbilitySystem/Abilities/AuraGameplayAbility.h"
 
 #include "AuraGameplayTags.h"
+#include "AbilitySystem/AuraAttributeSet.h"
 
 const FGameplayTagContainer* UAuraGameplayAbility::GetCooldownTags() const
 {
@@ -28,4 +29,41 @@ void UAuraGameplayAbility::ApplyCooldown(const FGameplayAbilitySpecHandle Handle
 		SpecHandle.Data.Get()->SetSetByCallerMagnitude(FAuraGameplayTags::Get().Data_Cooldown, CooldownDuration.GetValueAtLevel(GetAbilityLevel()));
 		ApplyGameplayEffectSpecToOwner(Handle, ActorInfo, ActivationInfo, SpecHandle);
 	}
+}
+
+FString UAuraGameplayAbility::GetCurrentLevelDescription(const int32 Level)
+{
+	return FString::Printf(TEXT("<Default>%s, </><Level>%d</>"), L"Default Ability Name - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum", Level);
+}
+
+FString UAuraGameplayAbility::GetNextLevelDescription(const int32 Level)
+{
+	return FString::Printf(TEXT("<Default> Next Level </><Level>%d</> \n <Default> causes much more damage </>"), Level);
+}
+
+FString UAuraGameplayAbility::GetLockedDescription(const int32 Level)
+{
+	return FString::Printf(TEXT("<Default>Spell locked until level: %d</>"), Level);
+}
+
+float UAuraGameplayAbility::GetManaCost(const float InLevel) const
+{
+	float ManaCost = 0.f;
+	if (const UGameplayEffect* CostEffect = GetCostGameplayEffect())
+	{
+		for (FGameplayModifierInfo Mod: CostEffect->Modifiers)
+		{
+			if (Mod.Attribute == UAuraAttributeSet::GetManaAttribute())
+			{
+				Mod.ModifierMagnitude.GetStaticMagnitudeIfPossible(InLevel, ManaCost);
+				break;
+			}
+		}
+	}
+	return ManaCost;
+}
+
+float UAuraGameplayAbility::GetCooldown(const float InLevel) const
+{
+	return CooldownDuration.GetValueAtLevel(InLevel);
 }

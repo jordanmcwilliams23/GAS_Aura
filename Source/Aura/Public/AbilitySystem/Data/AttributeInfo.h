@@ -22,6 +22,9 @@ struct FAuraAttributeInfo
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	FText AttributeDescription = FText();
 
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	FLinearColor AttributeColor = FLinearColor();
+
 	UPROPERTY(BlueprintReadOnly)
 	float AttributeValue = 0.f;
 
@@ -38,7 +41,7 @@ class AURA_API UAttributeInfo : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	const FAuraAttributeInfo FindAttributeTagInfo(const FGameplayTag& Tag, bool bLogNotFound = false);
+	FAuraAttributeInfo FindAttributeTagInfo(const FGameplayTag& Tag, bool bLogNotFound = false);
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FAuraAttributeInfo> AttributeInformation;

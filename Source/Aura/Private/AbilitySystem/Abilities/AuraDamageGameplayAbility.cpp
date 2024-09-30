@@ -9,9 +9,12 @@
 void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 {
 	const FGameplayEffectSpecHandle Spec = MakeOutgoingGameplayEffectSpec(DamageEffectClass, GetAbilityLevel());
-	for (TTuple<FGameplayTag, FScalableFloat> Pair: DamageTypes)
-	{
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(Spec, Pair.Key, Pair.Value.GetValueAtLevel(GetAbilityLevel()));
-	}
+	
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(Spec, DamageType, Damage.GetValueAtLevel(GetAbilityLevel()));
 	GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor));
+}
+
+int32 UAuraDamageGameplayAbility::GetRoundedDamageAtLevel(const int32 Level) const
+{
+	return Damage.AsInteger(Level);
 }

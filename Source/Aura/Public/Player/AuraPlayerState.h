@@ -8,6 +8,8 @@
 #include "Aura/AuraTypes.h"
 #include "AuraPlayerState.generated.h"
 
+class UAuraAbilitySystemComponent;
+class UGameplayEffect;
 class UAttributeSet;
 class ULevelUpInfo;
 class UAbilitySystemComponent;
@@ -28,37 +30,68 @@ public:
 
 	FORCEINLINE int32 GetPlayerLevel() const {return Level;}
 	FORCEINLINE int32 GetPlayerXP() const {return XP;}
+	FORCEINLINE int32 GetAttributePoints() const {return AttributePoints;}
+	FORCEINLINE int32 GetSpellPoints() const {return SpellPoints;}
 	
 	FOnInt32ChangedSignature OnXPChangedDelegate;
 	FOnInt32ChangedSignature OnLevelChangedDelegate;
+	FOnInt32ChangedSignature OnAttributePointsChangedDelegate;
+	FOnInt32ChangedSignature OnSpellPointsChangedDelegate;
 
 	void SetXP(const int32 NewXP) { XP = NewXP; OnXPChangedDelegate.Broadcast(XP); }
 	void AddXP(const int32 AddedXP);
 
+	void AddAttributePoints(int32 Points);
+	void SetAttributePoints(int32 Points);
+	void AddSpellPoints(int32 Points);
+
 	void SetLevel(const int32 NewLevel) { Level = NewLevel; OnLevelChangedDelegate.Broadcast(Level);}
 	void AddLevel(const int32 AddedLevels) { Level += AddedLevels; OnLevelChangedDelegate.Broadcast(Level);}
 
+	ULevelUpInfo* GetLevelUpInfo() const {return LevelUpInfo; };
+	
+
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<ULevelUpInfo> LevelUpInfo;
+	TSubclassOf<UGameplayEffect> SetPrimaryAttributesGameplayEffect;
 
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UAuraAbilitySystemComponent> AuraAbilitySystemComponent;
+
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
 
 private:
+
+	UAuraAbilitySystemComponent* GetAuraAbilitySystem();
+	
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<ULevelUpInfo> LevelUpInfo;
 	
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_Level)
 	int32 Level = 1;
 
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_XP)
 	int32 XP = 0;
+	
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_AttributePoints)
+	int32 AttributePoints = 0;
 
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_AttributePoints)
+	int32 SpellPoints = 0;
+	
 	UFUNCTION()
 	void OnRep_XP(int32 OldXP) const;
 
 	UFUNCTION()
 	void OnRep_Level(int32 OldLevel) const;
+
+	UFUNCTION()
+	void OnRep_AttributePoints(int32 OldAttributePoints) const;
+
+	UFUNCTION()
+	void OnRep_SpellPoints(int32 OldSpellPoints) const;
 };

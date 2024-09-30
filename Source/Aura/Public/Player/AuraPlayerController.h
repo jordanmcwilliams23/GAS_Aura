@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Interaction/PlayerControllerInterface.h"
 #include "AuraPlayerController.generated.h"
 
 class UDamageTextComponent;
@@ -38,7 +39,7 @@ struct FCameraOccludedActor
  * 
  */
 UCLASS()
-class AURA_API AAuraPlayerController : public APlayerController
+class AURA_API AAuraPlayerController : public APlayerController, public IPlayerControllerInterface
 {
 	GENERATED_BODY()
 public:
@@ -53,6 +54,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SyncOccludedActors();
+
+	/* Player Controller Interface */
+	virtual void MenuOpened() override;
+	virtual void MenuClosed() override;
+	/* End Player Controller Interface */
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -79,8 +85,13 @@ protected:
 	 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera Occlusion|Occlusion")
 	bool DebugLineTraces;
+
+	int NumMenusOpen = 0;
 	
 private:
+
+	FInputModeGameAndUI GameAndUIInputMode;
+	
 	UPROPERTY(EditAnywhere, Category="Input")
 	TObjectPtr<UInputMappingContext> AuraContext;
 	

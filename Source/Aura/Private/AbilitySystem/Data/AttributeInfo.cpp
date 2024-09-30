@@ -2,10 +2,9 @@
 
 
 #include "AbilitySystem/Data/AttributeInfo.h"
-
 #include "Aura/AuraLogChannels.h"
 
-const FAuraAttributeInfo UAttributeInfo::FindAttributeTagInfo(const FGameplayTag& Tag, const bool bLogNotFound)
+FAuraAttributeInfo UAttributeInfo::FindAttributeTagInfo(const FGameplayTag& Tag, const bool bLogNotFound)
 {
 	for (const FAuraAttributeInfo& Info: AttributeInformation)
 	{

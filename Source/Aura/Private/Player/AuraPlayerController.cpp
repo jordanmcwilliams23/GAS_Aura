@@ -58,10 +58,9 @@ void AAuraPlayerController::BeginPlay()
 	}
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Default;
-	FInputModeGameAndUI InputModeData;
-	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	InputModeData.SetHideCursorDuringCapture(false);
-	SetInputMode(InputModeData);
+	GameAndUIInputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	GameAndUIInputMode.SetHideCursorDuringCapture(false);
+	SetInputMode(GameAndUIInputMode);
 	
 	if (IsValid(GetPawn()))
 	{
@@ -253,6 +252,22 @@ void AAuraPlayerController::SyncOccludedActors()
 	    ForceShowOccludedActors();
 	  }
 	}
+
+void AAuraPlayerController::MenuOpened()
+{
+	if (++NumMenusOpen == 1)
+	{
+		SetInputMode(FInputModeUIOnly());
+	}
+}
+
+void AAuraPlayerController::MenuClosed()
+{
+	if (--NumMenusOpen == 0)
+	{
+		SetInputMode(GameAndUIInputMode);
+	}
+}
 
 bool AAuraPlayerController::HideOccludedActor(const AActor* Actor)
 	{

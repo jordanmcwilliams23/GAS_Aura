@@ -13,50 +13,76 @@
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "AuraAbilityTypes.h"
 #include "AuraGameplayTags.h"
+#include "AuraNamedArguments.h"
+#include "AbilitySystem/Abilities/AuraDamageGameplayAbility.h"
+#include "AbilitySystem/Abilities/AuraGameplayAbility.h"
 #include "Character/AuraCharacterBase.h"
 #include "Player/AuraPlayerController.h"
-#include "AbilitySystem/Data/LevelUpInfo.h"
 
-UOverlayWidgetController* UAuraAbilitySystemLibrary::GetOverlayWidgetController(const UObject* WorldContext)
+bool UAuraAbilitySystemLibrary::MakeWidgetControllerParams(const UObject* WorldContext, FWidgetControllerParams& OutWCParams, AAuraHUD*& OutAuraHUD)
 {
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContext, 0))
 	{
 		if (AAuraHUD* AuraHUD = Cast<AAuraHUD>(PC->GetHUD()))
 		{
+			OutAuraHUD = AuraHUD;
 			AAuraPlayerState* PS = PC->GetPlayerState<AAuraPlayerState>();
 			UAuraAbilitySystemComponent* ASC = Cast<UAuraAbilitySystemComponent>(PS->GetAbilitySystemComponent());
 			UAuraAttributeSet* AttributeSet = Cast<UAuraAttributeSet>(PS->GetAttributeSet());
-			const FWidgetControllerParams Params(PC, PS, ASC, AttributeSet);
-			return AuraHUD->GetOverlayWidgetController(Params);
+			OutWCParams.AttributeSet = AttributeSet;
+			OutWCParams.PlayerState = PS;
+			OutWCParams.PlayerController = PC;
+			OutWCParams.AbilitySystemComponent = ASC;
+			return true;
 		}
+	}
+	return false; 
+}
+
+UOverlayWidgetController* UAuraAbilitySystemLibrary::GetOverlayWidgetController(const UObject* WorldContext)
+{
+	FWidgetControllerParams WCParams;
+	AAuraHUD* AuraHUD = nullptr;
+	//Check if widget controller params were made successfully
+	if (MakeWidgetControllerParams(WorldContext, WCParams, AuraHUD))
+	{
+		return AuraHUD->GetOverlayWidgetController(WCParams);
 	}
 	return nullptr; 
 }
 
 UAttributeMenuWidgetController* UAuraAbilitySystemLibrary::GetAttributeWidgetController(const UObject* WorldContext)
 {
-	if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContext, 0))
+	FWidgetControllerParams WCParams;
+	AAuraHUD* AuraHUD = nullptr;
+	//Check if widget controller params were made successfully
+	if (MakeWidgetControllerParams(WorldContext, WCParams, AuraHUD))
 	{
-		if (AAuraHUD* AuraHUD = Cast<AAuraHUD>(PC->GetHUD()))
-		{
-			AAuraPlayerState* PS = PC->GetPlayerState<AAuraPlayerState>();
-			UAuraAbilitySystemComponent* ASC = Cast<UAuraAbilitySystemComponent>(PS->GetAbilitySystemComponent());
-			UAuraAttributeSet* AS = Cast<UAuraAttributeSet>(PS->GetAttributeSet());
-			const FWidgetControllerParams Params(PC, PS, ASC, AS);
-			return AuraHUD->GetAttributeMenuWidgetController(Params);
-		}
+		return AuraHUD->GetAttributeMenuWidgetController(WCParams);
 	}
-	return nullptr;
+	return nullptr; 
+}
+
+USpellMenuWidgetController* UAuraAbilitySystemLibrary::GetSpellWidgetController(const UObject* WorldContext)
+{
+	FWidgetControllerParams WCParams;
+	AAuraHUD* AuraHUD = nullptr;
+	//Check if widget controller params were made successfully
+	if (MakeWidgetControllerParams(WorldContext, WCParams, AuraHUD))
+	{
+		return AuraHUD->GetSpellMenuWidgetController(WCParams);
+	}
+	return nullptr; 
 }
 
 void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(const UObject* WorldContext, const ECharacterClass CharacterClass, const float Level, UAbilitySystemComponent* ASC)
 {
-	const AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContext));
-	if (AuraGameModeBase == nullptr) return;
+	const IGameModeInterface* GameModeInterface = Cast<IGameModeInterface>(UGameplayStatics::GetGameMode(WorldContext));
+	if (GameModeInterface == nullptr) return;
 
 	const AActor* AvatarActor = ASC->GetAvatarActor();
-
-	const FCharacterClassDefaultInfo ClassDefaultInfo = AuraGameModeBase->CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
+	UCharacterClassInfo* CharacterClassInfo = GameModeInterface->GetCharacterClassInfo();
+	const FCharacterClassDefaultInfo ClassDefaultInfo = CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
 
 	FGameplayEffectContextHandle PrimaryContextHandle = ASC->MakeEffectContext();
 	PrimaryContextHandle.AddSourceObject(AvatarActor);
@@ -65,22 +91,23 @@ void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(const UObject* World
 
 	FGameplayEffectContextHandle SecondaryContextHandle = ASC->MakeEffectContext();
 	SecondaryContextHandle.AddSourceObject(AvatarActor);
-	const FGameplayEffectSpecHandle SecondarySpec = ASC->MakeOutgoingSpec(AuraGameModeBase->CharacterClassInfo->SecondaryAttributes, Level, SecondaryContextHandle);
+	const FGameplayEffectSpecHandle SecondarySpec = ASC->MakeOutgoingSpec(CharacterClassInfo->SecondaryAttributes, Level, SecondaryContextHandle);
 	ASC->ApplyGameplayEffectSpecToSelf(*SecondarySpec.Data.Get());
 
 	FGameplayEffectContextHandle VitalContextHandle = ASC->MakeEffectContext();
 	VitalContextHandle.AddSourceObject(AvatarActor);
-	const FGameplayEffectSpecHandle VitalSpec = ASC->MakeOutgoingSpec(AuraGameModeBase->CharacterClassInfo->VitalAttributes, Level, VitalContextHandle);
+	const FGameplayEffectSpecHandle VitalSpec = ASC->MakeOutgoingSpec(CharacterClassInfo->VitalAttributes, Level, VitalContextHandle);
 	ASC->ApplyGameplayEffectSpecToSelf(*VitalSpec.Data.Get());
 }
 
 void UAuraAbilitySystemLibrary::InitializeDefaultAbilities(const UObject* WorldContext, UAbilitySystemComponent* ASC, const ECharacterClass Class)
 {
-	const AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContext));
-	if (AuraGameModeBase == nullptr) return;
+	const IGameModeInterface* GameModeInterface = Cast<IGameModeInterface>(UGameplayStatics::GetGameMode(WorldContext));
+	if (GameModeInterface == nullptr) return;
 
+	UCharacterClassInfo* CharacterClassInfo = GameModeInterface->GetCharacterClassInfo();
 	//Common abilities
-	for (const TSubclassOf<UGameplayAbility>& Ability :AuraGameModeBase->CharacterClassInfo->CommonAbilities)
+	for (const TSubclassOf<UGameplayAbility>& Ability :CharacterClassInfo->CommonAbilities)
 	{
 		ASC->GiveAbility(FGameplayAbilitySpec(Ability, 1));
 	}
@@ -90,7 +117,7 @@ void UAuraAbilitySystemLibrary::InitializeDefaultAbilities(const UObject* WorldC
 	{
 		Level = ICombatInterface::Execute_GetCharacterLevel(ASC->GetAvatarActor());
 	}
-	for (const TSubclassOf<UGameplayAbility>& Ability: AuraGameModeBase->CharacterClassInfo->CharacterClassInformation[Class].ClassAbilities)
+	for (const TSubclassOf<UGameplayAbility>& Ability:CharacterClassInfo->CharacterClassInformation[Class].ClassAbilities)
 	{
 		ASC->GiveAbility(FGameplayAbilitySpec(Ability, Level));
 	}
@@ -98,9 +125,18 @@ void UAuraAbilitySystemLibrary::InitializeDefaultAbilities(const UObject* WorldC
 
 UCharacterClassInfo* UAuraAbilitySystemLibrary::GetCharacterClassInfo(const UObject* WorldContext)
 {
-	if (const AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContext)))
+	if (const IGameModeInterface* GameModeInterface = Cast<IGameModeInterface>(UGameplayStatics::GetGameMode(WorldContext)))
 	{
-		return AuraGameMode->CharacterClassInfo;
+		return GameModeInterface->GetCharacterClassInfo();
+	}
+	return nullptr;
+}
+
+UAbilityInfo* UAuraAbilitySystemLibrary::GetAbilityInfo(const UObject* WorldContext)
+{
+	if (const IGameModeInterface* GameModeInterface = Cast<IGameModeInterface>(UGameplayStatics::GetGameMode(WorldContext)))
+	{
+		return GameModeInterface->GetAbilityInfo();
 	}
 	return nullptr;
 }
@@ -184,6 +220,89 @@ TArray<AAuraPlayerController*> UAuraAbilitySystemLibrary::GetAllPlayerController
 
 float UAuraAbilitySystemLibrary::GetXPAmount(const UObject* WorldContext, const ECharacterClass Class, const int Level)
 {
-	const AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContext));
-	return AuraGameModeBase->CharacterClassInfo->CharacterClassInformation[Class].XPAmount.GetValueAtLevel(Level);
+	const IGameModeInterface* GameModeInterface = CastChecked<IGameModeInterface>(UGameplayStatics::GetGameMode(WorldContext));
+	return GameModeInterface->GetCharacterClassInfo()->CharacterClassInformation[Class].XPAmount.GetValueAtLevel(Level);
+}
+
+TArray<FGameplayTag> UAuraAbilitySystemLibrary::CallerMagnitudeTags(const TSubclassOf<UGameplayEffect> GameplayEffect)
+{
+	const UGameplayEffect* GE = GameplayEffect.GetDefaultObject();
+	const TArray<FGameplayModifierInfo> ModifierInfo = GE->Modifiers;
+	TArray<FGameplayTag> CallerTags;
+
+	for (const FGameplayModifierInfo& Info: ModifierInfo)
+	{
+		if (Info.ModifierMagnitude.GetMagnitudeCalculationType() == EGameplayEffectMagnitudeCalculation::SetByCaller)
+		{
+			CallerTags.Add(Info.ModifierMagnitude.GetSetByCallerFloat().DataTag);
+		}
+	}
+	return CallerTags;
+}
+
+FString UAuraAbilitySystemLibrary::GetAbilityDescription(const UObject* WorldContextObject,
+	const FGameplayTag& AbilityTag)
+{
+	FAuraAbilityInfo Info = GetAbilityInfo(WorldContextObject)->FindAbilityInfoForTag(AbilityTag);
+	const int32 Level = Info.Ability->GetDefaultObject<UGameplayAbility>()->GetAbilityLevel();
+	UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(Info.Ability.GetDefaultObject());
+	FormatAbilityDescriptionAtLevel(Ability, Info.Description, Info.DamageType,Level);
+	return FString::Printf(
+		TEXT(
+		"<Title>%s </>\n"
+		"<Title>Level %d</>\n"
+		"%s\n"
+		"\n"
+		"<Default>Mana - </><Mana>%d</>\n"
+		"<Default>Cooldown - </><Cooldown>%3.1fs</>"
+		),
+		*Info.Name.ToString(),
+		Level,
+		*Info.Description.ToString(),
+		FMath::RoundToInt(-Ability->GetManaCost(Level)),
+		Ability->GetCooldown(Level)
+	);
+}
+
+FString UAuraAbilitySystemLibrary::GetAbilityNextLevelDescription(const UObject* WorldContextObject,
+	const FGameplayTag& AbilityTag)
+{
+	FAuraAbilityInfo Info = GetAbilityInfo(WorldContextObject)->FindAbilityInfoForTag(AbilityTag);
+	const int32 Level = Info.Ability->GetDefaultObject<UGameplayAbility>()->GetAbilityLevel();
+	UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(Info.Ability.GetDefaultObject());
+	FormatAbilityDescriptionAtLevel(Ability, Info.NextLevelDescription, Info.DamageType,Level);
+	return FString::Printf(
+		TEXT(
+		"<Title>%s</>\n"
+		"<Title>Level </><Old>%d</><Level> > %d</>\n"
+		"%s\n"
+		"\n"
+		"<Default>Mana - </><Old>%d</><Default> > </><Mana>%d</>\n"
+		"<Default>Cooldown - </><Old>%3.1fs</><Default> > </><Cooldown>%3.1fs</>"
+		),
+		*Info.Name.ToString(),
+		Level,
+		Level+1,
+		*Info.NextLevelDescription.ToString(),
+		FMath::RoundToInt(-Ability->GetManaCost(Level)),
+		FMath::RoundToInt(-Ability->GetManaCost(Level+1)),
+		Ability->GetCooldown(Level),
+		Ability->GetCooldown(Level+1)
+	);
+}
+
+void UAuraAbilitySystemLibrary::FormatAbilityDescriptionAtLevel(UGameplayAbility* Ability, FText& OutDescription, const FGameplayTag& DamageType, const int32 Level)
+{
+	const FAuraGameplayTags Tags = FAuraGameplayTags::Get();
+	if (UAuraDamageGameplayAbility* DamageAbility = Cast<UAuraDamageGameplayAbility>(Ability))
+	{
+		const FAuraNamedArguments Args;
+		OutDescription = FText::FormatNamed(
+		OutDescription,
+		Args.Damage0,
+		DamageAbility->GetRoundedDamageAtLevel(Level),
+		Args.Damage1,
+		DamageAbility->GetRoundedDamageAtLevel(Level + 1)
+		);
+	}
 }

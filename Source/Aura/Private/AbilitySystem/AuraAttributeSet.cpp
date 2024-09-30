@@ -56,8 +56,23 @@ void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
 	Super::PreAttributeChange(Attribute, NewValue);
 }
 
+void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
+{
+	Super::PostAttributeChange(Attribute, OldValue, NewValue);
+
+	if (Attribute == GetMaxHealthAttribute() && bTopOffHealth)
+	{
+		SetHealth(GetMaxHealth());
+		bTopOffHealth = false;
+	} else if (Attribute == GetMaxManaAttribute() && bTopOffMana)
+	{
+		SetMana(GetMaxMana());
+		bTopOffMana = false;
+	}
+}
+
 void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data,
-	FEffectProperties& Props) const
+                                            FEffectProperties& Props) const
 {
 	Props.EffectContextHandle = Data.EffectSpec.GetContext();
 	Props.SourceASC = Props.EffectContextHandle.GetOriginalInstigatorAbilitySystemComponent();
@@ -101,7 +116,7 @@ void UAuraAttributeSet::SendXPEvent(const FEffectProperties& EffectProperties) c
 {
 	if (EffectProperties.TargetCharacter->Implements<UCombatInterface>())
 	{
-		int32 TargetLevel = ICombatInterface::Execute_GetCharacterLevel(EffectProperties.TargetCharacter);
+		const int32 TargetLevel = ICombatInterface::Execute_GetCharacterLevel(EffectProperties.TargetCharacter);
 		const float XPReward = UAuraAbilitySystemLibrary::GetXPAmount(this, ICombatInterface::Execute_GetCharacterClass(EffectProperties.TargetCharacter.Get()), TargetLevel);
 		FGameplayEventData GameplayEventData = FGameplayEventData();
 		GameplayEventData.EventTag = FAuraGameplayTags::Get().Attributes_Meta_IncomingXP;
@@ -136,7 +151,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 		if (NewHealth > 0.f)
 		{
 			//Hit React
-			const FGameplayTagContainer Tags(FAuraGameplayTags::Get().Effects_HitReact);
+			const FGameplayTagContainer Tags(FAuraGameplayTags::Get().Abilities_HitReact);
 			Props.TargetASC->TryActivateAbilitiesByTag(Tags);
 		} else
 		{
@@ -164,6 +179,7 @@ void UAuraAttributeSet::RefillVitalAttributes()
 {
 	SetHealth(GetMaxHealth());
 	SetMana(GetMaxMana());
+	bTopOffHealth = bTopOffMana = true;
 }
 
 

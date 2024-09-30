@@ -5,17 +5,21 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 
-#define DECLARE_DAMAGE_AND_RESISTANCE_TYPE_TAGS(T)\
-	FGameplayTag Damage_##T; \
-	FGameplayTag Attributes_Resistance_##T; \
+#define DECLARE_DAMAGE_RESISTANCE_DEBUFF_TYPE_TAGS(AttName, DebuffName)\
+	FGameplayTag Damage_##AttName; \
+	FGameplayTag Attributes_Resistance_##AttName; \
+	FGameplayTag Debuff_##DebuffName; \
 
-#define INITIALIZE_DAMAGE_AND_RESISTANCE_TYPE_TAGS(T)\
+#define INITIALIZE_DAMAGE_RESISTANCE_DEBUFF_TYPE_TAGS(AttName, DebuffName)\
 {\
-	FString TagDamage = "Damage."#T; \
-	FString TagResistance = "Attributes.Resistance."#T; \
-	GameplayTags.Damage_##T = UGameplayTagsManager::Get().AddNativeGameplayTag(*TagDamage, TagDamage); \
-	GameplayTags.Attributes_Resistance_##T = UGameplayTagsManager::Get().AddNativeGameplayTag(*TagResistance, TagResistance); \
-	GameplayTags.DamageTypesToResistances.Add(GameplayTags.Damage_##T, GameplayTags.Attributes_Resistance_##T); \
+	FString TagDamage = "Damage."#AttName; \
+	FString TagResistance = "Attributes.Resistance."#AttName; \
+	FString TagDebuff = "Debuff."#DebuffName; \
+	GameplayTags.Damage_##AttName = UGameplayTagsManager::Get().AddNativeGameplayTag(*TagDamage, TagDamage); \
+	GameplayTags.Attributes_Resistance_##AttName = UGameplayTagsManager::Get().AddNativeGameplayTag(*TagResistance, TagResistance); \
+	GameplayTags.Debuff_##DebuffName = UGameplayTagsManager::Get().AddNativeGameplayTag(*TagDebuff, FString("Debuff for "#AttName" Damage")); \
+	GameplayTags.DamageTypesToResistances.Add(GameplayTags.Damage_##AttName, GameplayTags.Attributes_Resistance_##AttName); \
+	GameplayTags.DamageTypesToDebuffs.Add(GameplayTags.Damage_##AttName, GameplayTags.Debuff_##DebuffName); \
 \
 };
 
@@ -61,24 +65,44 @@ public:
 	FGameplayTag InputTag_2;
 	FGameplayTag InputTag_3;
 	FGameplayTag InputTag_4;
+	FGameplayTag InputTag_Passive_1;
+	FGameplayTag InputTag_Passive_2;
 	/* End Input Tags */
 
 	/* Damage Types & Resistances */
 	FGameplayTag Damage;
 
-	DECLARE_DAMAGE_AND_RESISTANCE_TYPE_TAGS(Fire);
-	DECLARE_DAMAGE_AND_RESISTANCE_TYPE_TAGS(Lightning);
-	DECLARE_DAMAGE_AND_RESISTANCE_TYPE_TAGS(Arcane);
-	DECLARE_DAMAGE_AND_RESISTANCE_TYPE_TAGS(Physical);
+	DECLARE_DAMAGE_RESISTANCE_DEBUFF_TYPE_TAGS(Fire, Burn);
+	DECLARE_DAMAGE_RESISTANCE_DEBUFF_TYPE_TAGS(Lightning, Stun);
+	DECLARE_DAMAGE_RESISTANCE_DEBUFF_TYPE_TAGS(Arcane, Arcane);
+	DECLARE_DAMAGE_RESISTANCE_DEBUFF_TYPE_TAGS(Physical, Physical);
 
+	FGameplayTag Debuff_Chance;
+	FGameplayTag Debuff_Damage;
+	FGameplayTag Debuff_Frequency;
+	FGameplayTag Debuff_Duration;
 	/* End Damage Types & Resistances */
 
 	/* Ability Tags */
 	FGameplayTag Abilities;
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_Summon;
+	
+	FGameplayTag Abilities_HitReact;
 
+	FGameplayTag Abilities_Status;
+	FGameplayTag Abilities_Status_Locked;
+	FGameplayTag Abilities_Status_Eligible;
+	FGameplayTag Abilities_Status_Unlocked;
+	FGameplayTag Abilities_Status_Equipped;
+
+	FGameplayTag Abilities_Type_None;
+	FGameplayTag Abilities_Type_Offensive;
+	FGameplayTag Abilities_Type_Passive;
+	
 	FGameplayTag Abilities_Fire_FireBolt;
+
+	FGameplayTag Abilities_Lightning_Electrocute;
 	/* End Ability Tags */
 
 	/* Data Tags */
@@ -106,6 +130,7 @@ public:
 	FGameplayTagContainer DamageTypes;
 	
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances;
+	TMap<FGameplayTag, FGameplayTag> DamageTypesToDebuffs;
 	TMap<FGameplayTag, FName> TagToSocketName;
 	
 	FGameplayTag Effects_HitReact;

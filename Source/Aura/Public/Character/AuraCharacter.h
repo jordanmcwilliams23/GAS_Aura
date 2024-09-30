@@ -7,6 +7,10 @@
 #include "Interaction/PlayerInterface.h"
 #include "AuraCharacter.generated.h"
 
+class USpringArmComponent;
+class UCameraComponent;
+class UNiagaraComponent;
+class AAuraPlayerState;
 /**
  * 
  */
@@ -26,8 +30,25 @@ public:
 	/** Player Interface */
 	virtual void AddToXP_Implementation(int32 InXP) override;
 	virtual void LevelUp_Implementation() override;
+	virtual int32 GetAttributePoints_Implementation() const override;
+	virtual void AddAttributePoints_Implementation(int32 Points) override;
+	virtual int32 GetSpellPoints_Implementation() const override;
+	virtual void AddSpellPoints_Implementation(int32 Points) override;
 	/** End Player Interface */
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UNiagaraComponent> LevelUpNiagaraComponent;
 private:
 	virtual void InitAbilityActorInfo() override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastLevelUpParticles() const;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UCameraComponent> CameraComponent;
 	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USpringArmComponent> CameraBoomComponent;
+
+	TObjectPtr<AAuraPlayerState> AuraPlayerState;
 };

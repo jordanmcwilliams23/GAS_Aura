@@ -16,10 +16,27 @@ class AURA_API UAuraDamageGameplayAbility : public UAuraGameplayAbility
 public:
 	UFUNCTION(BlueprintCallable, Category = "Damage")
 	void CauseDamage(AActor* TargetActor);
+
+	int32 GetRoundedDamageAtLevel(int32 Level) const;
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UGameplayEffect> DamageEffectClass;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Damage", meta=(Categories="Damage"))
+	FGameplayTag DamageType;
 
 	UPROPERTY(EditDefaultsOnly, Category="Damage")
-	TMap<FGameplayTag, FScalableFloat> DamageTypes;
+	FScalableFloat Damage;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Damage")
+	FScalableFloat DebuffChance;
+
+	UPROPERTY(EditDefaultsOnly, Category="Damage")
+	FScalableFloat DebuffDamage;
+
+	UPROPERTY(EditDefaultsOnly, Category="Damage")
+	FScalableFloat DebuffFrequency;
+
+	UPROPERTY(EditDefaultsOnly, Category="Damage")
+	FScalableFloat DebuffDuration;
 };
