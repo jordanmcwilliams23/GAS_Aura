@@ -21,7 +21,7 @@ AAuraProjectile* UAuraProjectileSpell::SpawnProjectile(const FGameplayTag& Comba
 {
 	if (const bool bIsServer = GetAvatarActorFromActorInfo()->HasAuthority(); !bIsServer) return nullptr;
 
-	if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetAvatarActorFromActorInfo()))
+	if (GetAvatarActorFromActorInfo()->Implements<UCombatInterface>())
 	{
 		const FVector SocketLocation = ICombatInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(), CombatSocketTag);
 		FTransform SpawnTransform;
@@ -50,7 +50,7 @@ AAuraProjectile* UAuraProjectileSpell::SpawnProjectile(const FGameplayTag& Comba
 		const float ScaledDamage = Damage.GetValueAtLevel(GetAbilityLevel());
 		SpecHandle.Data.Get()->SetSetByCallerMagnitude(DamageType, ScaledDamage);
 		Projectile->SetOwner(GetAvatarActorFromActorInfo());
-		Projectile->DamageEffectSpecHandle = SpecHandle;
+		Projectile->DamageEffectParams = MakeDamageEffectParamsFromEffectDefaults();
 		Projectile->FinishSpawning(SpawnTransform);
 		return Projectile;
 	}

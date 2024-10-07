@@ -43,3 +43,8 @@ UAbilityInfo* AAuraGameModeBase::GetAbilityInfo() const
 {
 	return AbilityInfo;
 }
+
+TArray<AAuraPlayerController*> AAuraGameModeBase::GetAuraPlayerControllers() const
+{
+	return PlayerControllers;
+}

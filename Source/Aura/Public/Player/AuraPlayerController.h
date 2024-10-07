@@ -7,6 +7,7 @@
 #include "Interaction/PlayerControllerInterface.h"
 #include "AuraPlayerController.generated.h"
 
+class UNiagaraSystem;
 class UDamageTextComponent;
 struct FInputActionInstance;
 struct FGameplayTag;
@@ -118,6 +119,9 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USplineComponent> Spline;
 
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNiagaraSystem> ClickNiagaraSystem;
+
 	void Move(const struct FInputActionValue& InputActionValue);
 	void CursorTrace();
 	TScriptInterface<ITargetInterface> LastActor;
@@ -145,9 +149,9 @@ private:
 	TMap<const AActor*, FCameraOccludedActor> OccludedActors;
 
 	bool HideOccludedActor(const AActor* Actor);
-	bool OnHideOccludedActor(const FCameraOccludedActor& OccludedActor) const;
+	void OnHideOccludedActor(const FCameraOccludedActor& OccludedActor) const;
 	void ShowOccludedActor(FCameraOccludedActor& OccludedActor);
-	bool OnShowOccludedActor(const FCameraOccludedActor& OccludedActor) const;
+	static void OnShowOccludedActor(const FCameraOccludedActor& OccludedActor);
 	void ForceShowOccludedActors();
 	 
 	__forceinline bool ShouldCheckCameraOcclusion() const

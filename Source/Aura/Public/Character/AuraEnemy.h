@@ -6,7 +6,6 @@
 #include "Character/AuraCharacterBase.h"
 #include "Interaction/TargetInterface.h"
 #include "Aura/AuraTypes.h"
-#include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "AuraEnemy.generated.h"
 
 class UWidgetComponent;
@@ -31,16 +30,14 @@ public:
 
 	/** Combat Interface */
 	virtual int32 GetCharacterLevel_Implementation() override;
-	virtual void Die() override;
+	virtual void Die(const FVector& DeathImpulse) override;
 	/** End Combat Interface */
 
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+	virtual void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount) override;
 
 	UPROPERTY(BlueprintReadOnly, Category="Combat")
 	bool bHitReacting = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Combat")
-	float BaseWalkSpeed = 250.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Combat")
 	float LifeSpan = 5.f;

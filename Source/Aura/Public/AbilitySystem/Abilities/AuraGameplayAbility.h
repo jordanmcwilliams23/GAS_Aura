@@ -14,13 +14,13 @@ class AURA_API UAuraGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditDefaultsOnly, Category="Input")
+	UPROPERTY(EditDefaultsOnly, Category="Input", meta=(Categories = "InputTag"))
 	FGameplayTag StartupGameplayTag;
 	
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Cooldown")
 	FScalableFloat CooldownDuration;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Cooldown")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Cooldown", meta=(Categories = "Abilities"))
 	FGameplayTagContainer CooldownTags;
 
 	// Temp container that we will return the pointer to in GetCooldownTags().

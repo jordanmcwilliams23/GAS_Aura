@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AuraAbilityTypes.h"
 #include "AbilitySystem/Abilities/AuraGameplayAbility.h"
 #include "AuraDamageGameplayAbility.generated.h"
 
@@ -18,6 +19,12 @@ public:
 	void CauseDamage(AActor* TargetActor);
 
 	int32 GetRoundedDamageAtLevel(int32 Level) const;
+
+	UFUNCTION(BlueprintPure)
+	FDamageEffectParams MakeDamageEffectParamsFromEffectDefaults(AActor* TargetActor = nullptr) const;
+
+	UFUNCTION(BlueprintPure)
+	float GetDamageAtCurrentLevel() const;
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UGameplayEffect> DamageEffectClass;
@@ -26,17 +33,26 @@ protected:
 	FGameplayTag DamageType;
 
 	UPROPERTY(EditDefaultsOnly, Category="Damage")
-	FScalableFloat Damage;
+	FScalableFloat Damage = 20.f;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Damage")
-	FScalableFloat DebuffChance;
+	float DebuffChance = 25.f;
 
 	UPROPERTY(EditDefaultsOnly, Category="Damage")
-	FScalableFloat DebuffDamage;
+	float DebuffDamage = 5.f;
 
 	UPROPERTY(EditDefaultsOnly, Category="Damage")
-	FScalableFloat DebuffFrequency;
+	float DebuffFrequency = 1.f;
 
 	UPROPERTY(EditDefaultsOnly, Category="Damage")
-	FScalableFloat DebuffDuration;
+	float DebuffDuration = 3.f;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Damage")
+	FVector2f DeathImpulseMagnitudeMinMax = FVector2f(3000.f, 6000.f);
+
+	UPROPERTY(EditDefaultsOnly, Category="Damage")
+	float KnockbackMagnitude = 1000.f;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Damage")
+	float KnockbackChance = 0.f;
 };

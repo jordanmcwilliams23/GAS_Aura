@@ -18,8 +18,6 @@ class AURA_API AAuraGameModeBase : public AGameModeBase, public IGameModeInterfa
 {
 	GENERATED_BODY()
 public:
-	TArray<AAuraPlayerController*> GetAllPlayerControllers() {return PlayerControllers;}
-	
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void Logout(AController* Exiting) override;
 
@@ -32,6 +30,8 @@ public:
 	virtual UCharacterClassInfo* GetCharacterClassInfo() const override;
 	UFUNCTION()
 	virtual UAbilityInfo* GetAbilityInfo() const override;
+	UFUNCTION()
+	virtual TArray<AAuraPlayerController*> GetAuraPlayerControllers() const override;
 	/* End Game Mode Interface */
 
 	UPROPERTY(EditDefaultsOnly, Category="Ability Info")

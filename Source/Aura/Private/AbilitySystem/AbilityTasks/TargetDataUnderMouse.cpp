@@ -3,6 +3,7 @@
 
 #include "AbilitySystem/AbilityTasks/TargetDataUnderMouse.h"
 #include "AbilitySystemComponent.h"
+#include "Aura/Aura.h"
 #include "Player/AuraPlayerController.h"
 
 UTargetDataUnderMouse* UTargetDataUnderMouse::CreateTargetDataUnderMouse(UGameplayAbility* OwningAbility)
@@ -28,7 +29,7 @@ void UTargetDataUnderMouse::Activate()
 	}
 }
 
-void UTargetDataUnderMouse::SendMouseCursorData()
+void UTargetDataUnderMouse::SendMouseCursorData() const
 {
 	FScopedPredictionWindow ScopedPrediction(AbilitySystemComponent.Get());
 	AAuraPlayerController* PlayerController = Cast<AAuraPlayerController>(GetOwnerActor()->Owner);
@@ -37,7 +38,9 @@ void UTargetDataUnderMouse::SendMouseCursorData()
 
 	FGameplayAbilityTargetDataHandle DataHandle;
 	FGameplayAbilityTargetData_SingleTargetHit* Data = new FGameplayAbilityTargetData_SingleTargetHit();
-	Data->HitResult = PlayerController->GetCursorHit();
+	FHitResult HitResult;
+	PlayerController->GetHitResultUnderCursor(ECC_Target, false, HitResult);
+	Data->HitResult = HitResult;
 	DataHandle.Add(Data);
 	
 	AbilitySystemComponent->ServerSetReplicatedTargetData(GetAbilitySpecHandle(),

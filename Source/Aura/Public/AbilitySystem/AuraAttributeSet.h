@@ -224,6 +224,9 @@ public:
 	/* End Gameplay Attributes OnRep Functions */
 	
 private:
+	void HandleIncomingDamage(const FEffectProperties& Props);
+	void HandleIncomingXP(const FEffectProperties& Props);
+	void Debuff(const FEffectProperties& Props) const;
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 	static void ShowFloatingText(const FEffectProperties& Props, float Damage, bool bIsBlockedHit=false, bool bIsCriticalHit=false);
 	void SendXPEvent(const FEffectProperties& FullEffectProperties) const;

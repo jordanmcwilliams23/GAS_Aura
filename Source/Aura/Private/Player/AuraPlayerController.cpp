@@ -11,15 +11,17 @@
 #include "GameplayTagContainer.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
+#include "NiagaraFunctionLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "Aura/Aura.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SplineComponent.h"
 #include "GameFramework/Actor.h"
 #include "UI/Widget/DamageTextComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Containers/Set.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -84,10 +86,11 @@ void AAuraPlayerController::SetupInputComponent()
 
 void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPressed)) return;
 	const FVector2d FInputVector = InputActionValue.Get<FVector2d>();
 	const FRotator Rotation = GetControlRotation();
 	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
-
+	
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
@@ -101,6 +104,14 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 
 void AAuraPlayerController::CursorTrace()
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_CursorTrace))
+	{
+		if (LastActor) LastActor->UnhighlightActor();
+		if (CurrentActor) CurrentActor->UnhighlightActor();
+		LastActor = nullptr;
+		CurrentActor = nullptr;
+		return;
+	}
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 	if (!CursorHit.bBlockingHit) return;
 	LastActor = CurrentActor;
@@ -114,45 +125,52 @@ void AAuraPlayerController::CursorTrace()
 
 void AAuraPlayerController::AbilityInputTagPressed(const FInputActionInstance& Instance, const FGameplayTag InputTag)
 {
-	//if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
-	//{
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPressed)) return;
 	bTargeting = CurrentActor != nullptr;
 	bAutoRunning = false;
-	//}
+	if (GetASC())
+	{
+		GetASC()->AbilityInputTagPressed(InputTag);
+	}
 }
 
 void AAuraPlayerController::AbilityInputTagReleased(const FGameplayTag InputTag)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputReleased)) return;
 	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB) && GetASC())
 	{
 		GetASC()->AbilityInputTagReleased(InputTag);
 		return;
 	}
-	if (GetASC()) GetASC()->AbilityInputTagReleased(InputTag);
+	if (GetASC()) { GetASC()->AbilityInputTagReleased(InputTag); }
 	
-	if (!bTargeting && !bShiftKeyDown)
+	if (bTargeting || bShiftKeyDown) return;
+	
+	if (const APawn* ControlledPawn = GetPawn(); FollowTime <= ShortPressThreshold && ControlledPawn)
 	{
-		if (const APawn* ControlledPawn = GetPawn(); FollowTime <= ShortPressThreshold && ControlledPawn)
+		if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(this, ControlledPawn->GetActorLocation(), CachedDestination))
 		{
-			if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(this, ControlledPawn->GetActorLocation(), CachedDestination))
+			Spline->ClearSplinePoints();
+			for (const FVector& Point: NavPath->PathPoints) Spline->AddSplinePoint(Point, ESplineCoordinateSpace::World);
+			
+			if (NavPath->PathPoints.Num() > 0)
 			{
-				Spline->ClearSplinePoints();
-				for (const FVector& Point: NavPath->PathPoints) Spline->AddSplinePoint(Point, ESplineCoordinateSpace::World);
-				
-				if (NavPath->PathPoints.Num() > 0)
-				{
-					CachedDestination = NavPath->PathPoints.Last();
-					bAutoRunning = true;
-				}
+				CachedDestination = NavPath->PathPoints.Last();
+				bAutoRunning = true;
 			}
 		}
-		FollowTime = 0.f;
-		bTargeting = false;
+		if (GetASC() && !GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPressed))
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
+		}
 	}
+	FollowTime = 0.f;
+	bTargeting = false;
 }
 
-void AAuraPlayerController::AbilityInputTagHeld(const FInputActionValue& Value, FGameplayTag InputTag) 
+void AAuraPlayerController::AbilityInputTagHeld(const FInputActionValue& Value, const FGameplayTag InputTag)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputHeld)) return;
 	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB) && GetASC())
 	{
 		GetASC()->AbilityInputTagHeld(InputTag);
@@ -227,9 +245,8 @@ void AAuraPlayerController::SyncOccludedActors()
 	    // Hide actors that are occluded by the camera
 	    for (FHitResult Hit : OutHits)
 	    {
-	      const AActor* HitActor = Cast<AActor>(Hit.GetActor());
-	      HideOccludedActor(HitActor);
-	      ActorsJustOccluded.Add(HitActor);
+	      HideOccludedActor(Hit.GetActor());
+	      ActorsJustOccluded.Add(Hit.GetActor());
 	    }
 	 
 	    // Show actors that are currently hidden but that are not occluded by the camera anymore 
@@ -256,55 +273,50 @@ void AAuraPlayerController::SyncOccludedActors()
 void AAuraPlayerController::MenuOpened()
 {
 	if (++NumMenusOpen == 1)
-	{
 		SetInputMode(FInputModeUIOnly());
-	}
 }
 
 void AAuraPlayerController::MenuClosed()
 {
 	if (--NumMenusOpen == 0)
-	{
 		SetInputMode(GameAndUIInputMode);
-	}
 }
 
 bool AAuraPlayerController::HideOccludedActor(const AActor* Actor)
-	{
-	  FCameraOccludedActor* ExistingOccludedActor = OccludedActors.Find(Actor);
-	 
-	  if (ExistingOccludedActor && ExistingOccludedActor->IsOccluded)
-	  {
-	    if (DebugLineTraces) UE_LOG(LogTemp, Warning, TEXT("Actor %s was already occluded. Ignoring."),
-	                                *Actor->GetName());
-	    return false;
-	  }
-	 
-	  if (ExistingOccludedActor && IsValid(ExistingOccludedActor->Actor))
-	  {
-	    ExistingOccludedActor->IsOccluded = true;
-	    OnHideOccludedActor(*ExistingOccludedActor);
-	 
-	    if (DebugLineTraces) UE_LOG(LogTemp, Warning, TEXT("Actor %s exists, but was not occluded. Occluding it now."), *Actor->GetName());
-	  }
-	  else
-	  {
-	    UStaticMeshComponent* StaticMesh = Cast<UStaticMeshComponent>(
-	      Actor->GetComponentByClass(UStaticMeshComponent::StaticClass()));
-	 
-	    FCameraOccludedActor OccludedActor;
-	    OccludedActor.Actor = Actor;
-	    OccludedActor.StaticMesh = StaticMesh;
-	    OccludedActor.Materials = StaticMesh->GetMaterials();
-	    OccludedActor.IsOccluded = true;
-	    OccludedActors.Add(Actor, OccludedActor);
-	    OnHideOccludedActor(OccludedActor);
-	 
-	    if (DebugLineTraces) UE_LOG(LogTemp, Warning, TEXT("Actor %s does not exist, creating and occluding it now."), *Actor->GetName());
-	  }
-	 
-	  return true;
-	}
+{
+  FCameraOccludedActor* ExistingOccludedActor = OccludedActors.Find(Actor);
+ 
+  if (ExistingOccludedActor && ExistingOccludedActor->IsOccluded)
+  {
+    if (DebugLineTraces) UE_LOG(LogTemp, Warning, TEXT("Actor %s was already occluded. Ignoring."),
+                                *Actor->GetName());
+    return false;
+  }
+ 
+  if (ExistingOccludedActor && IsValid(ExistingOccludedActor->Actor))
+  {
+    ExistingOccludedActor->IsOccluded = true;
+    OnHideOccludedActor(*ExistingOccludedActor);
+ 
+    if (DebugLineTraces) UE_LOG(LogTemp, Warning, TEXT("Actor %s exists, but was not occluded. Occluding it now."), *Actor->GetName());
+  }
+  else
+  {
+    UStaticMeshComponent* StaticMesh = Cast<UStaticMeshComponent>(
+      Actor->GetComponentByClass(UStaticMeshComponent::StaticClass()));
+ 
+    FCameraOccludedActor OccludedActor;
+    OccludedActor.Actor = Actor;
+    OccludedActor.StaticMesh = StaticMesh;
+    OccludedActor.Materials = StaticMesh->GetMaterials();
+    OccludedActor.IsOccluded = true;
+    OccludedActors.Add(Actor, OccludedActor);
+    OnHideOccludedActor(OccludedActor);
+ 
+    if (DebugLineTraces) UE_LOG(LogTemp, Warning, TEXT("Actor %s does not exist, creating and occluding it now."), *Actor->GetName());
+  }
+	return true;
+}
 	 
 	 
 void AAuraPlayerController::ForceShowOccludedActors()
@@ -331,23 +343,21 @@ void AAuraPlayerController::ShowOccludedActor(FCameraOccludedActor& OccludedActo
 	  OnShowOccludedActor(OccludedActor);
 	}
 	 
-bool AAuraPlayerController::OnShowOccludedActor(const FCameraOccludedActor& OccludedActor) const
+void AAuraPlayerController::OnShowOccludedActor(const FCameraOccludedActor& OccludedActor)
 {
-	  for (int matIdx = 0; matIdx < OccludedActor.Materials.Num(); ++matIdx)
-	  {
-	    OccludedActor.StaticMesh->SetMaterial(matIdx, OccludedActor.Materials[matIdx]);
-	  }
-	 
-	  return true;
-	}
-	 
-bool AAuraPlayerController::OnHideOccludedActor(const FCameraOccludedActor& OccludedActor) const
+	for (int MatIdx = 0; MatIdx < OccludedActor.Materials.Num(); ++MatIdx)
 	{
-	  for (int i = 0; i < OccludedActor.StaticMesh->GetNumMaterials(); ++i)
-	  {
-	    OccludedActor.StaticMesh->SetMaterial(i, FadeMaterial);
-	  }
-	 
-	  return true;
+		OccludedActor.StaticMesh->SetMaterial(MatIdx, OccludedActor.Materials[MatIdx]);
 	}
+	OccludedActor.StaticMesh->SetCollisionResponseToChannel(ECC_Target, ECR_Block);
+}
+	 
+void AAuraPlayerController::OnHideOccludedActor(const FCameraOccludedActor& OccludedActor) const
+{
+	for (int i = 0; i < OccludedActor.StaticMesh->GetNumMaterials(); ++i)
+	{
+		OccludedActor.StaticMesh->SetMaterial(i, FadeMaterial);
+	}
+	OccludedActor.StaticMesh->SetCollisionResponseToChannel(ECC_Target, ECR_Ignore);
+}
 

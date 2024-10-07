@@ -9,6 +9,10 @@
 
 enum class ECharacterClass : uint8;
 class UNiagaraSystem;
+class UAbilitySystemComponent;
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnASCRegistered, UAbilitySystemComponent*)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath, class AActor*, DeadCharacter);
 
 USTRUCT(BlueprintType)
 struct FTaggedMontage
@@ -61,7 +65,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	AActor* GetAvatar();
 
-	virtual void Die() = 0;
+	virtual void Die(const FVector& DeathImpulse = FVector::ZeroVector) = 0;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	TArray<FTaggedMontage> GetAttackMontages();
@@ -77,7 +81,17 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void IncrementMinionCount(const int32 Amount);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	USkeletalMeshComponent* GetWeapon() const;
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	ECharacterClass GetCharacterClass();
+
+	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() = 0;
+	
+	virtual FOnDeath& GetOnDeathDelegate() = 0;
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SetInShockLoop(const bool InLoop);
 };

@@ -3,10 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AbilitySystem/Data/AbilityInfo.h"
 #include "UObject/Interface.h"
 #include "GameModeInterface.generated.h"
 
+class AAuraPlayerController;
+class UAbilityInfo;
 class UCharacterClassInfo;
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, NotBlueprintable)
@@ -33,4 +34,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual UAbilityInfo* GetAbilityInfo() const = 0;
+
+	UFUNCTION(BlueprintCallable)
+	virtual TArray<AAuraPlayerController*> GetAuraPlayerControllers() const = 0;
 };

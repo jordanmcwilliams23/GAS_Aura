@@ -35,6 +35,7 @@ AAuraProjectile::AAuraProjectile()
 void AAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+	SetReplicateMovement(true);
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AAuraProjectile::OnSphereOverlap);
 	UGameplayStatics::SpawnSoundAttached(
 		LoopingSpawnSound,
@@ -47,14 +48,16 @@ void AAuraProjectile::BeginPlay()
 	SetLifeSpan(LifeSpan);
 }
 
+void AAuraProjectile::OnHit()
+{
+	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+	bHit = true;
+}
+
 void AAuraProjectile::Destroyed()
 {
-	if (!bHit && !HasAuthority())
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
-		bHit = true;
-	}
+	if (!bHit && !HasAuthority()) OnHit();
 	Super::Destroyed();
 }
 
@@ -63,24 +66,25 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 {
 	//Don't hit owning actor or actors on same team
 	if (OtherActor == GetOwner() || !UAuraAbilitySystemLibrary::IsNotFriend(GetOwner(), OtherActor)) return;
-	if (!bHit)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
-		bHit = true;
-	}
+	if (!bHit) OnHit();
 
 	if (HasAuthority())
 	{
 		if (UAbilitySystemComponent* OverlappedASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
 		{
-			OverlappedASC->ApplyGameplayEffectSpecToSelf(*DamageEffectSpecHandle.Data.Get());
+			DamageEffectParams.TargetASC = OverlappedASC;
+			const FVector DeathImpulse = GetActorForwardVector() * DamageEffectParams.GetDeathImpulseMagnitude();
+			DamageEffectParams.DeathImpulse = DeathImpulse;
+			//Check for knockback
+			if (UAuraAbilitySystemLibrary::RNGRoll(DamageEffectParams.KnockbackChance))
+			{
+				FRotator Rotation = GetActorRotation();
+				Rotation.Pitch = 45.f;
+				DamageEffectParams.KnockbackForce = Rotation.Vector() * DamageEffectParams.KnockbackMagnitude;
+			}
+			UAuraAbilitySystemLibrary::ApplyDamageEffect(DamageEffectParams);
 		}
-		
 		Destroy();
-	} else
-	{
-		bHit = true;
-	}
+	} else { bHit = true; }
 }
 
