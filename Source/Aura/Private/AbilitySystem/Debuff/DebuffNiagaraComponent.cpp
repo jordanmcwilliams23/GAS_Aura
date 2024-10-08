@@ -16,6 +16,7 @@ UDebuffNiagaraComponent::UDebuffNiagaraComponent()
 void UDebuffNiagaraComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!GetOwner()->HasAuthority()) return;
 	ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetOwner());
 	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner());
 	if (ASC)
