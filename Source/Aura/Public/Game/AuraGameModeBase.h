@@ -29,8 +29,6 @@ public:
 	UFUNCTION()
 	virtual UCharacterClassInfo* GetCharacterClassInfo() const override;
 	UFUNCTION()
-	virtual UAbilityInfo* GetAbilityInfo() const override;
-	UFUNCTION()
 	virtual TArray<AAuraPlayerController*> GetAuraPlayerControllers() const override;
 	/* End Game Mode Interface */
 

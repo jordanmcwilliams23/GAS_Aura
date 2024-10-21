@@ -43,4 +43,7 @@ protected:
 	TObjectPtr<UAttributeInfo> AttributeInfo;
 private:
 	void BroadcastAttributeInfo(const FGameplayTag& Tag) const;
+
+	UFUNCTION()
+	void OnSpellPointsChanged(const int32 SpellPoints);
 };

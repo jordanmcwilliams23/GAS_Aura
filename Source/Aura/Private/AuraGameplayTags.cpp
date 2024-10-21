@@ -112,11 +112,30 @@ void FAuraGameplayTags::InitializeNativeTags()
 			FString("Offensive Ability Type"));
 	GameplayTags.Abilities_Type_Passive = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Type.Passive"),
 			FString("Passive Ability Type"));
-	
+
+	/* Offensive Ability Tags */
 	GameplayTags.Abilities_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Fire.FireBolt"),
 		FString("FireBolt Ability Tag"));
+	
+	GameplayTags.Abilities_Fire_FireBlast = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Fire.FireBlast"),
+		FString("FireBlast Ability Tag"));
+	
 	GameplayTags.Abilities_Lightning_Electrocute = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Lightning.Electrocute"),
 		FString("Electrocute Ability Tag"));
+	
+	GameplayTags.Abilities_Arcane_ArcaneShards = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Arcane.ArcaneShards"),
+		FString("Arcane Shards Ability Tag"));
+
+	
+	/* Passive Ability Tags */
+	GameplayTags.Abilities_Passive = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Passive"),
+		FString("Passive Ability Parent Tag"));
+	GameplayTags.Abilities_Passive_HaloOfProtection = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Passive.HaloOfProtection"),
+		FString("Halo Of Protection Passive Ability"));
+	GameplayTags.Abilities_Passive_LifeSiphon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Passive.LifeSiphon"),
+		FString("Life Siphon Passive Ability"));
+	GameplayTags.Abilities_Passive_ManaSiphon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Passive.ManaSiphon"),
+		FString("ManaSiphon Passive Ability"));
 
 	/* Data Tags */
 	GameplayTags.Data_Cooldown = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Data.Cooldown"),

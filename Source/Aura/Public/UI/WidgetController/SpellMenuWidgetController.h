@@ -35,5 +35,7 @@ public:
 	bool GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag,UPARAM(ref) FString& OutDescription,UPARAM(ref) FString& OutNextDescription);
 
 	void OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const FGameplayTag& InputTag, const FGameplayTag& PrevInputTag) const;
-private:
+
+	UFUNCTION()
+	void OnSpellPointsChanged(const int32 SpellPoints);
 };

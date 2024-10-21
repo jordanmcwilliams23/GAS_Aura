@@ -21,7 +21,13 @@ public:
 	int32 GetRoundedDamageAtLevel(int32 Level) const;
 
 	UFUNCTION(BlueprintPure)
-	FDamageEffectParams MakeDamageEffectParamsFromEffectDefaults(AActor* TargetActor = nullptr) const;
+	FDamageEffectParams MakeDamageEffectParamsFromEffectDefaults(
+		AActor* TargetActor = nullptr,
+		FVector RadialDamageOrigin = FVector::ZeroVector,
+		bool bInOverrideKnockbackDirection = false,
+		FVector OverrideKnockbackDirection = FVector::ZeroVector,
+		bool bInOverrideDeathImpulseDirection = false,
+		FVector OverrideDeathImpulseDirection = FVector::ZeroVector) const;
 
 	UFUNCTION(BlueprintPure)
 	float GetDamageAtCurrentLevel() const;
@@ -55,4 +61,13 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="Damage")
 	float KnockbackChance = 0.f;
+
+	UPROPERTY(EditDefaultsOnly, Category="Damage")
+	bool bIsRadialDamage = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Damage")
+	float RadialDamageInnerRadius = 0.f;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Damage")
+	float RadialDamageOuterRadius = 0.f;
 };

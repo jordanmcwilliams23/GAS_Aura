@@ -145,6 +145,7 @@ void AAuraEnemy::InitAbilityActorInfo()
 	}
 	OnASCRegistered.Broadcast(AbilitySystemComponent);
 	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Debuff_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AAuraEnemy::StunTagChanged);
+	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Debuff_Burn, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AAuraEnemy::BurnTagChanged);
 }
 
 void AAuraEnemy::InitializeDefaultAttributes() const

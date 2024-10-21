@@ -34,6 +34,7 @@ public:
 	virtual void AddAttributePoints_Implementation(int32 Points) override;
 	virtual int32 GetSpellPoints_Implementation() const override;
 	virtual void AddSpellPoints_Implementation(int32 Points) override;
+	virtual void ShowTargetingActor_Implementation(TSubclassOf<ATargetingActor> TargetingActorSubclass, const bool bInShow, UMaterialInterface* Material = nullptr, float Radius = 0.f) override;
 	/** End Player Interface */
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

@@ -33,8 +33,5 @@ public:
 	virtual UCharacterClassInfo* GetCharacterClassInfo() const = 0;
 
 	UFUNCTION(BlueprintCallable)
-	virtual UAbilityInfo* GetAbilityInfo() const = 0;
-
-	UFUNCTION(BlueprintCallable)
 	virtual TArray<AAuraPlayerController*> GetAuraPlayerControllers() const = 0;
 };

@@ -19,7 +19,9 @@
 #include "AbilitySystem/Abilities/AuraGameplayAbility.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Character/AuraCharacterBase.h"
+#include "Interaction/GameStateInterface.h"
 #include "Player/AuraPlayerController.h"
+#include "GameFramework/GameStateBase.h"
 
 bool UAuraAbilitySystemLibrary::MakeWidgetControllerParams(const UObject* WorldContext, FWidgetControllerParams& OutWCParams, AAuraHUD*& OutAuraHUD)
 {
@@ -124,8 +126,8 @@ UCharacterClassInfo* UAuraAbilitySystemLibrary::GetCharacterClassInfo(const UObj
 
 UAbilityInfo* UAuraAbilitySystemLibrary::GetAbilityInfo(const UObject* WorldContext)
 {
-	if (const IGameModeInterface* GameModeInterface = Cast<IGameModeInterface>(UGameplayStatics::GetGameMode(WorldContext)))
-		return GameModeInterface->GetAbilityInfo();
+	if (const IGameStateInterface* GameStateInterface = Cast<IGameStateInterface>(UGameplayStatics::GetGameState(WorldContext)))
+		return GameStateInterface->GetAbilityInfo();
 	return nullptr;
 }
 
@@ -209,6 +211,34 @@ float UAuraAbilitySystemLibrary::GetKnockbackChance(const FGameplayEffectContext
 	return 0.f;
 }
 
+bool UAuraAbilitySystemLibrary::GetIsRadialDamage(const FGameplayEffectContextHandle& ContextHandle)
+{
+	if (const FAuraGameplayEffectContext* EffectContext = static_cast<const FAuraGameplayEffectContext*>(ContextHandle.Get()))
+		return EffectContext->GetIsRadialDamage();
+	return false;
+}
+
+float UAuraAbilitySystemLibrary::GetRadialDamageInnerRadius(const FGameplayEffectContextHandle& ContextHandle)
+{
+	if (const FAuraGameplayEffectContext* EffectContext = static_cast<const FAuraGameplayEffectContext*>(ContextHandle.Get()))
+		return EffectContext->GetRadialDamageInnerRadius();
+	return 0.f;
+}
+
+float UAuraAbilitySystemLibrary::GetRadialDamageOuterRadius(const FGameplayEffectContextHandle& ContextHandle)
+{
+	if (const FAuraGameplayEffectContext* EffectContext = static_cast<const FAuraGameplayEffectContext*>(ContextHandle.Get()))
+		return EffectContext->GetRadialDamageOuterRadius();
+	return 0.f;
+}
+
+FVector UAuraAbilitySystemLibrary::GetRadialDamageOrigin(const FGameplayEffectContextHandle& ContextHandle)
+{
+	if (const FAuraGameplayEffectContext* EffectContext = static_cast<const FAuraGameplayEffectContext*>(ContextHandle.Get()))
+		return EffectContext->GetRadialDamageOrigin();
+	return FVector::ZeroVector;
+}
+
 void UAuraAbilitySystemLibrary::SetIsBlockedHit(FGameplayEffectContextHandle& EffectContextHandle, const bool bInIsBlockedHit)
 {
 	if (FAuraGameplayEffectContext* EffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
@@ -253,10 +283,7 @@ void UAuraAbilitySystemLibrary::SetDamageType(FGameplayEffectContextHandle& Effe
 	const FGameplayTag& InDamageType)
 {
 	if (FAuraGameplayEffectContext* EffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
-	{
-		const TSharedPtr<FGameplayTag> DamageTypePtr = MakeShared<FGameplayTag>(InDamageType);
-		EffectContext->SetDamageType(DamageTypePtr);
-	}
+		EffectContext->SetDamageType(MakeShared<FGameplayTag>(InDamageType));
 }
 
 void UAuraAbilitySystemLibrary::SetDeathImpulse(FGameplayEffectContextHandle& EffectContextHandle,
@@ -285,6 +312,34 @@ void UAuraAbilitySystemLibrary::SetKnockbackChance(FGameplayEffectContextHandle&
 {
 	if (FAuraGameplayEffectContext* EffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
 		EffectContext->SetKnockbackChance(InKnockbackChance);
+}
+
+void UAuraAbilitySystemLibrary::SetIsRadialDamage(FGameplayEffectContextHandle& EffectContextHandle,
+	const bool InIsRadialDamage)
+{
+	if (FAuraGameplayEffectContext* EffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+		EffectContext->SetIsRadialDamage(InIsRadialDamage);
+}
+
+void UAuraAbilitySystemLibrary::SetRadialDamageInnerRadius(FGameplayEffectContextHandle& EffectContextHandle,
+	const float InRadialDamageInnerRadius)
+{
+	if (FAuraGameplayEffectContext* EffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+		EffectContext->SetRadialDamageInnerRadius(InRadialDamageInnerRadius);
+}
+
+void UAuraAbilitySystemLibrary::SetRadialDamageOuterRadius(FGameplayEffectContextHandle& EffectContextHandle,
+	const float InRadialDamageOuterRadius)
+{
+	if (FAuraGameplayEffectContext* EffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+		EffectContext->SetRadialDamageOuterRadius(InRadialDamageOuterRadius);
+}
+
+void UAuraAbilitySystemLibrary::SetRadialDamageOrigin(FGameplayEffectContextHandle& EffectContextHandle,
+	const FVector InRadialDamageOrigin)
+{
+	if (FAuraGameplayEffectContext* EffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()))
+		EffectContext->SetRadialDamageOrigin(InRadialDamageOrigin);
 }
 
 void UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(UObject* WorldContextObject,
@@ -378,54 +433,61 @@ TArray<FGameplayTag> UAuraAbilitySystemLibrary::CallerMagnitudeTags(const TSubcl
 }
 
 FString UAuraAbilitySystemLibrary::GetAbilityDescription(const UObject* WorldContextObject,
-	const FGameplayTag& AbilityTag)
+	const FGameplayTag& AbilityTag, const int32 Level)
 {
 	FAuraAbilityInfo Info = GetAbilityInfo(WorldContextObject)->FindAbilityInfoForTag(AbilityTag);
-	const int32 Level = Info.Ability->GetDefaultObject<UGameplayAbility>()->GetAbilityLevel();
 	UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(Info.Ability.GetDefaultObject());
+	const bool bIsPassiveAbility = AbilityTag.MatchesTag(FAuraGameplayTags::Get().Abilities_Passive);
 	FormatAbilityDescriptionAtLevel(Ability, Info.Description, Info.DamageType,Level);
-	return FString::Printf(
-		TEXT(
-		"<Title>%s </>\n"
-		"<Title>Level %d</>\n"
+	FString AbilityDescription = FString::Printf(TEXT(
+		"<Title>%s</>\n"
+		"<Level>Level %d</>\n"
 		"%s\n"
-		"\n"
-		"<Default>Mana - </><Mana>%d</>\n"
-		"<Default>Cooldown - </><Cooldown>%3.1fs</>"
 		),
 		*Info.Name.ToString(),
 		Level,
-		*Info.Description.ToString(),
-		FMath::RoundToInt(-Ability->GetManaCost(Level)),
-		Ability->GetCooldown(Level)
+		*Info.Description.ToString()
 	);
+	if (!bIsPassiveAbility)
+	{
+		 AbilityDescription.Appendf(TEXT(
+			"\n<Default>Mana - </><Mana>%d</>\n"
+			"<Default>Cooldown - </><Cooldown>%3.1fs</>"),
+			FMath::RoundToInt(-Ability->GetManaCost(Level)),
+			Ability->GetCooldown(Level)
+			); 
+	}
+	return AbilityDescription;
 }
 
 FString UAuraAbilitySystemLibrary::GetAbilityNextLevelDescription(const UObject* WorldContextObject,
-	const FGameplayTag& AbilityTag)
+	const FGameplayTag& AbilityTag, const int32 Level)
 {
 	FAuraAbilityInfo Info = GetAbilityInfo(WorldContextObject)->FindAbilityInfoForTag(AbilityTag);
-	const int32 Level = Info.Ability->GetDefaultObject<UGameplayAbility>()->GetAbilityLevel();
 	UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(Info.Ability.GetDefaultObject());
+	const bool bIsPassiveAbility = AbilityTag.MatchesTag(FAuraGameplayTags::Get().Abilities_Passive);
 	FormatAbilityDescriptionAtLevel(Ability, Info.NextLevelDescription, Info.DamageType,Level);
-	return FString::Printf(
-		TEXT(
-		"<Title>%s</>\n"
-		"<Title>Level </><Old>%d</><Level> > %d</>\n"
-		"%s\n"
-		"\n"
-		"<Default>Mana - </><Old>%d</><Default> > </><Mana>%d</>\n"
-		"<Default>Cooldown - </><Old>%3.1fs</><Default> > </><Cooldown>%3.1fs</>"
-		),
-		*Info.Name.ToString(),
+	FString AbilityDescription = FString::Printf(TEXT(
+		"<Title>NEXT LEVEL</>\n"
+		"<Level>Level </><Old>%d</><Level> > %d</>\n"
+		"%s\n"),
 		Level,
 		Level+1,
-		*Info.NextLevelDescription.ToString(),
-		FMath::RoundToInt(-Ability->GetManaCost(Level)),
-		FMath::RoundToInt(-Ability->GetManaCost(Level+1)),
-		Ability->GetCooldown(Level),
-		Ability->GetCooldown(Level+1)
-	);
+		*Info.NextLevelDescription.ToString()
+		);
+	if (!bIsPassiveAbility)
+	{
+		AbilityDescription.Appendf(TEXT(
+			"\n"
+			"<Default>Mana - </><Old>%d</><Default> > </><Mana>%d</>\n"
+			"<Default>Cooldown - </><Old>%3.1fs</><Default> > </><Cooldown>%3.1fs</>"),
+			FMath::RoundToInt(-Ability->GetManaCost(Level)),
+			FMath::RoundToInt(-Ability->GetManaCost(Level+1)),
+			Ability->GetCooldown(Level),
+			Ability->GetCooldown(Level+1)
+			);
+	}
+	return AbilityDescription;
 }
 
 void UAuraAbilitySystemLibrary::FormatAbilityDescriptionAtLevel(UGameplayAbility* Ability, FText& OutDescription, const FGameplayTag& DamageType, const int32 Level)
@@ -458,9 +520,20 @@ FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect(const 
 	Spec.Data->SetSetByCallerMagnitude(Tags.Debuff_Chance, Params.DebuffChance);
 	Spec.Data->SetSetByCallerMagnitude(Tags.Debuff_Frequency, Params.DebuffFrequency);
 	Spec.Data->SetSetByCallerMagnitude(Tags.Debuff_Duration, Params.DebuffDuration);
-	SetDamageType(Context, Params.DamageType);
-	SetDeathImpulse(Context, Params.DeathImpulse);
-	SetKnockbackForce(Context, Params.KnockbackForce);
+	if (FAuraGameplayEffectContext* EffectContext = static_cast<FAuraGameplayEffectContext*>(Context.Get()))
+	{
+		EffectContext->SetDamageType(MakeShared<FGameplayTag>(Params.DamageType));
+		EffectContext->SetDeathImpulse(Params.DeathImpulse);
+		EffectContext->SetKnockbackForce(Params.KnockbackForce);
+		EffectContext->SetKnockbackChance(Params.KnockbackChance);
+		if (Params.bIsRadialDamage)
+		{
+			EffectContext->SetIsRadialDamage(Params.bIsRadialDamage);
+			EffectContext->SetRadialDamageInnerRadius(Params.RadialDamageInnerRadius);
+			EffectContext->SetRadialDamageOuterRadius(Params.RadialDamageOuterRadius);
+			EffectContext->SetRadialDamageOrigin(Params.RadialDamageOrigin);
+		}
+	}
 	
 	Params.SourceASC->ApplyGameplayEffectSpecToTarget(*Spec.Data, Params.TargetASC);
 	return Context;

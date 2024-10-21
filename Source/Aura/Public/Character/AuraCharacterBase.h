@@ -6,9 +6,11 @@
 #include "AbilitySystemInterface.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
+#include "Aura/AuraTypes.h"
 #include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
 
+class UPassiveNiagaraComponent;
 class UNiagaraSystem;
 class UGameplayAbility;
 class UGameplayEffect;
@@ -27,6 +29,8 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 	virtual void Die(const FVector& DeathImpulse) override;
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	FOnFloatChangedSignature OnDamageDelegate;
 
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastHandleDeath(const FVector& DeathImpulse);
@@ -40,10 +44,20 @@ public:
 	UPROPERTY(ReplicatedUsing=OnRep_Stunned, BlueprintReadOnly)
 	bool bIsStunned = false;
 
+	UPROPERTY(ReplicatedUsing=OnRep_Burning, BlueprintReadOnly)
+	bool bIsBurning = false;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	bool bIsBeingShocked = false;
+
 	UFUNCTION()
 	virtual void OnRep_Stunned();
+	
+	UFUNCTION()
+	virtual void OnRep_Burning();
 
 	virtual void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+	virtual void BurnTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Combat")
 	float BaseWalkSpeed = 250.f;
@@ -70,6 +84,9 @@ protected:
 	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() override;
 	virtual FOnDeath& GetOnDeathDelegate() override;
 	virtual USkeletalMeshComponent* GetWeapon_Implementation() const override;
+	virtual bool IsBeingShocked_Implementation() const override;
+	virtual void SetBeingShocked_Implementation(const bool InBeingShocked) override;
+	virtual FOnFloatChangedSignature& GetOnDamageSignature() override;
 	/* End Combat Interface */
 	
 	UPROPERTY()
@@ -139,4 +156,17 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="Abilities")
 	TObjectPtr<UAnimMontage> HitReactMontage;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent> HaloOfProtectionNiagaraComponent;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent> LifeSiphonNiagaraComponent;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent> ManaSiphonNiagaraComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> EffectAttachComponent;
+	
 };

@@ -97,6 +97,15 @@ void AAuraCharacter::AddSpellPoints_Implementation(const int32 Points)
 	AuraPlayerState->AddSpellPoints(Points);
 }
 
+void AAuraCharacter::ShowTargetingActor_Implementation(const TSubclassOf<ATargetingActor> TargetingActorSubclass, const bool bInShow, UMaterialInterface* Material, float Radius)
+{
+	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
+	{
+		AuraPlayerController->ShowTargetingActor(TargetingActorSubclass, bInShow, Material, Radius);
+		AuraPlayerController->bShowMouseCursor = !bInShow;
+	}
+}
+
 void AAuraCharacter::MulticastLevelUpParticles_Implementation() const
 {
 	if (IsValid(LevelUpNiagaraComponent))
@@ -144,7 +153,8 @@ void AAuraCharacter::InitAbilityActorInfo()
 	OnASCRegistered.Broadcast(AbilitySystemComponent);
 	AttributeSet = AuraPlayerState->GetAttributeSet();
 	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Debuff_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AAuraCharacter::StunTagChanged);
-
+	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Debuff_Burn, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AAuraCharacter::BurnTagChanged);
+	
 	AbilitySystemComponent->InitAbilityActorInfo(AuraPlayerState, this);
 
 	//Only valid on local player

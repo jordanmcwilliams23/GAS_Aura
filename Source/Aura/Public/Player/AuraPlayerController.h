@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Actor/MagicCircle.h"
 #include "GameFramework/PlayerController.h"
 #include "Interaction/PlayerControllerInterface.h"
 #include "AuraPlayerController.generated.h"
@@ -60,6 +61,10 @@ public:
 	virtual void MenuOpened() override;
 	virtual void MenuClosed() override;
 	/* End Player Controller Interface */
+
+	UFUNCTION(BlueprintCallable)
+	void ShowTargetingActor(TSubclassOf<ATargetingActor> TargetingActorClass, const bool bInShow, UMaterialInterface* Material, float Radius = 0.f);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -118,6 +123,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USplineComponent> Spline;
+	
+	UPROPERTY()
+	TObjectPtr<ATargetingActor> TargetingActor;
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UNiagaraSystem> ClickNiagaraSystem;
@@ -158,4 +166,6 @@ private:
 	{
 		return IsOcclusionEnabled && FadeMaterial && ActiveCamera && ActiveCapsuleComponent;
 	}
+
+	void UpdateMagicCircleLocation() const;
 };

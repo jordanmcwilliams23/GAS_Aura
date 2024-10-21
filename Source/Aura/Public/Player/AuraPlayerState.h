@@ -36,7 +36,7 @@ public:
 	FOnInt32ChangedSignature OnXPChangedDelegate;
 	FOnInt32ChangedSignature OnLevelChangedDelegate;
 	FOnInt32ChangedSignature OnAttributePointsChangedDelegate;
-	FOnInt32ChangedSignature OnSpellPointsChangedDelegate;
+	FOnInt32ChangedSignatureDyn OnSpellPointsChangedDelegate;
 
 	void SetXP(const int32 NewXP) { XP = NewXP; OnXPChangedDelegate.Broadcast(XP); }
 	void AddXP(const int32 AddedXP);

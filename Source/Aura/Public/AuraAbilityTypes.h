@@ -60,6 +60,18 @@ struct FDamageEffectParams
 
 	UPROPERTY(BlueprintReadWrite)
 	FVector KnockbackForce = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsRadialDamage = false;
+
+	UPROPERTY(BlueprintReadWrite)
+	float RadialDamageInnerRadius = 0.f;
+	
+	UPROPERTY(BlueprintReadWrite)
+	float RadialDamageOuterRadius = 0.f;
+
+	UPROPERTY(BlueprintReadWrite)
+	FVector RadialDamageOrigin = FVector::ZeroVector;
 	
 	float GetDeathImpulseMagnitude() const { return FMath::RandRange(DeathImpulseMagnitudeMinMax.X, DeathImpulseMagnitudeMinMax.Y); }
 };
@@ -84,6 +96,12 @@ public:
 	bool GetShouldHitReact() const { return bShouldHitReact; }
 	FVector GetKnockbackForce() const { return KnockbackForce; }
 	float GetKnockbackChance() const { return KnockbackChance; }
+	bool GetIsRadialDamage() const { return bIsRadialDamage; }
+	float GetRadialDamageInnerRadius() const { return RadialDamageInnerRadius; }
+	float GetRadialDamageOuterRadius() const { return RadialDamageOuterRadius; }
+	FVector GetRadialDamageOrigin() const { return RadialDamageOrigin; }
+	
+	
 
 	void SetAppliedDebuff(const bool InAppliedDebuff) {bAppliedDebuff = InAppliedDebuff;}
 	void SetDebuffDamage(const float InDebuffDamage) {DebuffDamage = InDebuffDamage;}
@@ -94,6 +112,10 @@ public:
 	void SetShouldHitReact(const bool InShouldHitReact) { bShouldHitReact = InShouldHitReact; }
 	void SetKnockbackForce(const FVector& InKnockbackForce) { KnockbackForce = InKnockbackForce; }
 	void SetKnockbackChance(const float InKnockbackChance) { KnockbackChance = InKnockbackChance; }
+	void SetIsRadialDamage(const bool bInRadialDamage) { bIsRadialDamage = bInRadialDamage; }
+	void SetRadialDamageInnerRadius(const float InRadialDamageInnerRadius) { RadialDamageInnerRadius = InRadialDamageInnerRadius; }
+	void SetRadialDamageOuterRadius(const float InRadialDamageOuterRadius) { RadialDamageOuterRadius = InRadialDamageOuterRadius; }
+	void SetRadialDamageOrigin(const FVector& InRadialDamageOrigin) { RadialDamageOrigin = InRadialDamageOrigin; }
 	
 
 	
@@ -141,6 +163,18 @@ protected:
 
 	UPROPERTY()
 	float KnockbackChance = 0.f;
+
+	UPROPERTY()
+	bool bIsRadialDamage = false;
+
+	UPROPERTY()
+	float RadialDamageInnerRadius = 0.f;
+	
+	UPROPERTY()
+	float RadialDamageOuterRadius = 0.f;
+
+	UPROPERTY()
+	FVector RadialDamageOrigin = FVector::ZeroVector;
 };
 
 template<>

@@ -7,6 +7,7 @@
 #include "GameplayEffectTypes.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "AbilitySystem/Passive/PassiveNiagaraComponent.h"
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -35,22 +36,76 @@ AAuraCharacterBase::AAuraCharacterBase()
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Projectile, ECR_Overlap);
 	GetMesh()->SetGenerateOverlapEvents(true);
+
+	EffectAttachComponent = CreateDefaultSubobject<USceneComponent>("EffectAttachPoint");
+	EffectAttachComponent->SetupAttachment(GetRootComponent());
+	EffectAttachComponent->SetUsingAbsoluteRotation(true);
+	EffectAttachComponent->SetWorldRotation(FRotator::ZeroRotator);
+	
+	HaloOfProtectionNiagaraComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>("HaloOfProtectionNiagaraComponent");
+	HaloOfProtectionNiagaraComponent->SetupAttachment(EffectAttachComponent);
+	
+	LifeSiphonNiagaraComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>("LifeSiphonNiagaraComponent");
+	LifeSiphonNiagaraComponent->SetupAttachment(EffectAttachComponent);
+
+	ManaSiphonNiagaraComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>("ManaSiphonNiagaraComponent");
+	ManaSiphonNiagaraComponent->SetupAttachment(EffectAttachComponent);
 }
 
 void AAuraCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AAuraCharacterBase, bIsStunned);
+	DOREPLIFETIME(AAuraCharacterBase, bIsBurning);
+	DOREPLIFETIME(AAuraCharacterBase, bIsBeingShocked);
 }
 
 UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const { return AbilitySystemComponent; }
 
-void AAuraCharacterBase::OnRep_Stunned(){}
+void AAuraCharacterBase::OnRep_Stunned()
+{
+	//Needed so stun particles replicate to client
+	if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
+	{
+		const FAuraGameplayTags& AuraTags = FAuraGameplayTags::Get();
+		FGameplayTagContainer BlockedTags;
+		BlockedTags.AddTag(AuraTags.Player_Block_CursorTrace);
+		BlockedTags.AddTag(AuraTags.Player_Block_InputHeld);
+		BlockedTags.AddTag(AuraTags.Player_Block_InputPressed);
+		BlockedTags.AddTag(AuraTags.Player_Block_InputReleased);
+		if (bIsStunned)
+		{
+			AuraASC->AddLooseGameplayTags(BlockedTags);
+			StunDebuffComponent->Activate();
+		} else
+		{
+			AuraASC->RemoveLooseGameplayTags(BlockedTags);
+			StunDebuffComponent->Deactivate();
+		}
+	}
+}
+
+void AAuraCharacterBase::OnRep_Burning()
+{
+	if (bIsBurning)
+	{
+		BurnDebuffComponent->Activate();
+	} else
+	{
+		BurnDebuffComponent->Deactivate();
+	}
+}
 
 void AAuraCharacterBase::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
 	bIsStunned = NewCount > 0;
 	GetCharacterMovement()->MaxWalkSpeed = bIsStunned ? 0.f : BaseWalkSpeed;
+}
+
+void AAuraCharacterBase::BurnTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	bIsBurning = NewCount > 0;
+	if (bIsBurning) { BurnDebuffComponent->Activate(); } else { BurnDebuffComponent->Deactivate(); }
 }
 
 void AAuraCharacterBase::BeginPlay() { Super::BeginPlay(); }
@@ -61,9 +116,16 @@ UAnimMontage* AAuraCharacterBase::GetHitReactMontage_Implementation() const { re
 
 void AAuraCharacterBase::Die(const FVector& DeathImpulse)
 {
-	OnDeath.Broadcast(this);
 	Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
 	MulticastHandleDeath(DeathImpulse);
+}
+
+float AAuraCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	const float DamageTaken = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	OnDamageDelegate.Broadcast(DamageTaken);
+	return DamageTaken;
 }
 
 void AAuraCharacterBase::MulticastHandleDeath_Implementation(const FVector& DeathImpulse)
@@ -115,6 +177,21 @@ FOnASCRegistered& AAuraCharacterBase::GetOnASCRegisteredDelegate() { return OnAS
 FOnDeath& AAuraCharacterBase::GetOnDeathDelegate() { return OnDeath; }
 
 USkeletalMeshComponent* AAuraCharacterBase::GetWeapon_Implementation() const { return Weapon; }
+
+bool AAuraCharacterBase::IsBeingShocked_Implementation() const
+{
+	return bIsBeingShocked;
+}
+
+void AAuraCharacterBase::SetBeingShocked_Implementation(const bool InBeingShocked)
+{
+	bIsBeingShocked = InBeingShocked;
+}
+
+FOnFloatChangedSignature& AAuraCharacterBase::GetOnDamageSignature()
+{
+	return OnDamageDelegate;
+}
 
 void AAuraCharacterBase::ApplyEffectToSelf(const TSubclassOf<UGameplayEffect> Effect, const float Level) const
 {

@@ -10,6 +10,7 @@
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Interaction/CombatInterface.h"
+#include "Kismet/KismetMathLibrary.h"
 
 //Raw struct for internal C++ use here, notice no 'F' prefix or USTRUCT()
 struct AuraDamageStatics
@@ -141,24 +142,28 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	//Debuffs
 	HandleDebuff(ExecutionParams, OwningSpec, EvaluateParameters);
-
-	//Get Damage Set by caller
-	float Damage = 0.f;
+	
 	const FGameplayTag DamageTypeTag = UAuraAbilitySystemLibrary::GetDamageType(EffectContextHandle);
 	const FGameplayTag ResistanceTag = Tags.DamageTypesToResistances[DamageTypeTag];
-	checkf(DamageStatics().GetTagsToCaptureDef().Contains(ResistanceTag), TEXT("TagsToCaptureDefs does not contain tag [%s] in ExecCalc"), *ResistanceTag.ToString());
+	//checkf(DamageStatics().GetTagsToCaptureDef().Contains(ResistanceTag), TEXT("TagsToCaptureDefs does not contain tag [%s] in ExecCalc"), *ResistanceTag.ToString());
 	const FGameplayEffectAttributeCaptureDefinition CaptureDef = DamageStatics().GetTagsToCaptureDef()[ResistanceTag];
 
-	float DamageTypeValue = OwningSpec.GetSetByCallerMagnitude(DamageTypeTag, false, 0.f);
-	if (DamageTypeValue <= 0.f) return;
+	//Get Damage Set by caller
+	float Damage = OwningSpec.GetSetByCallerMagnitude(DamageTypeTag, false, 0.f);
+	if (Damage <= 0.f) return;
 	
 	float Resistance = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(CaptureDef, EvaluateParameters, Resistance);
 	Resistance = FMath::Clamp(Resistance, 0.f, 100.f);
 
-	DamageTypeValue *= 1.f - Resistance/100.f;
-	Damage += DamageTypeValue;
+	Damage *= 1.f - Resistance/100.f;
 
+	//check radial damage
+	if (FAuraGameplayEffectContext* EffectContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHandle.Get()); EffectContext->GetIsRadialDamage())
+	{
+		Damage = CalculateRadialDamage(EffectContextHandle, Damage, TargetAvatar);
+	}
+	
 	//Capture BlockChance on target and determine if attack was blocked
 	float TargetBlockChance = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().BlockChanceDef, EvaluateParameters, TargetBlockChance);
@@ -210,4 +215,21 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	const FGameplayModifierEvaluatedData EvaluatedData(UAuraAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, Damage);
 	OutExecutionOutput.AddOutputModifier(EvaluatedData);
+}
+
+float UExecCalc_Damage::CalculateRadialDamage(const FGameplayEffectContextHandle& EffectContextHandle, const float Damage,
+                                              const AActor* TargetAvatar)
+{
+	FVector TargetLocation = TargetAvatar->GetActorLocation();
+	const FVector Origin = UAuraAbilitySystemLibrary::GetRadialDamageOrigin(EffectContextHandle);
+
+	const float SquareDistance = FVector::DistSquaredXY(TargetLocation, Origin);
+	const float SquareInnerRadius = FMath::Square(UAuraAbilitySystemLibrary::GetRadialDamageInnerRadius(EffectContextHandle));
+	const float SquareOuterRadius = FMath::Square(UAuraAbilitySystemLibrary::GetRadialDamageOuterRadius(EffectContextHandle));
+	if (SquareDistance <= SquareInnerRadius) return Damage;
+
+	const TRange<float> DistanceRange(SquareInnerRadius, SquareOuterRadius);
+	const TRange<float> DamageScaleRange(1.f, 0.f);
+	const float DamageScale = FMath::GetMappedRangeValueClamped(DistanceRange, DamageScaleRange, SquareDistance);
+	return Damage * DamageScale;
 }

@@ -6,6 +6,7 @@
 #include "UObject/Interface.h"
 #include "PlayerInterface.generated.h"
 
+class ATargetingActor;
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UPlayerInterface : public UInterface
@@ -39,4 +40,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent)
 	void LevelUp();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, meta=(DefaultToSelf="Target"))
+	void ShowTargetingActor(TSubclassOf<ATargetingActor> TargetingActorSubclass, const bool bInShow, UMaterialInterface* Material = nullptr, float Radius = 0.f);
 };

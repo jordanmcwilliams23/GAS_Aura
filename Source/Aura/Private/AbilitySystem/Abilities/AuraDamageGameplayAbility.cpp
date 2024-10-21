@@ -20,7 +20,9 @@ int32 UAuraDamageGameplayAbility::GetRoundedDamageAtLevel(const int32 Level) con
 	return Damage.AsInteger(Level);
 }
 
-FDamageEffectParams UAuraDamageGameplayAbility::MakeDamageEffectParamsFromEffectDefaults(AActor* TargetActor) const
+FDamageEffectParams UAuraDamageGameplayAbility::MakeDamageEffectParamsFromEffectDefaults(AActor* TargetActor,
+	FVector RadialDamageOrigin, bool bInOverrideKnockbackDirection, FVector OverrideKnockbackDirection,
+	bool bInOverrideDeathImpulseDirection, FVector OverrideDeathImpulseDirection) const
 {
 	FDamageEffectParams Params;
 	Params.WorldContextObject = GetAvatarActorFromActorInfo();
@@ -33,15 +35,39 @@ FDamageEffectParams UAuraDamageGameplayAbility::MakeDamageEffectParamsFromEffect
 	Params.DebuffDamage = DebuffDamage;
 	Params.DebuffDuration = DebuffDuration;
 	Params.DebuffFrequency = DebuffFrequency;
-	Params.KnockbackMagnitude = KnockbackMagnitude;
-	Params.KnockbackChance = KnockbackChance;
-	Params.DeathImpulseMagnitudeMinMax = DeathImpulseMagnitudeMinMax;
 	if (IsValid(TargetActor))
 	{
 		FRotator Rotation = (TargetActor->GetActorLocation() - GetAvatarActorFromActorInfo()->GetActorLocation()).Rotation();
 		Rotation.Pitch = 45.f;
-		Params.DeathImpulse = Rotation.Vector() * Params.GetDeathImpulseMagnitude();
-		Params.KnockbackForce = Rotation.Vector() * Params.KnockbackMagnitude;
+		if (bInOverrideKnockbackDirection)
+		{
+			OverrideKnockbackDirection.Normalize();
+			Params.KnockbackForce = OverrideKnockbackDirection * KnockbackMagnitude;
+		} else
+		{
+			Params.KnockbackForce = Rotation.Vector() * Params.KnockbackMagnitude;
+		}
+		
+		if (bInOverrideDeathImpulseDirection)
+		{
+			OverrideKnockbackDirection.Normalize();
+			Params.DeathImpulse = OverrideKnockbackDirection * Params.GetDeathImpulseMagnitude();
+		} else
+		{
+			Params.DeathImpulse = Rotation.Vector() * Params.GetDeathImpulseMagnitude();
+		}
+	}
+	
+	Params.KnockbackMagnitude = KnockbackMagnitude;
+	Params.KnockbackChance = KnockbackChance;
+	
+	Params.DeathImpulseMagnitudeMinMax = DeathImpulseMagnitudeMinMax;
+	if (bIsRadialDamage)
+	{
+		Params.bIsRadialDamage = bIsRadialDamage;
+		Params.RadialDamageOrigin = RadialDamageOrigin;
+		Params.RadialDamageInnerRadius = RadialDamageInnerRadius;
+		Params.RadialDamageOuterRadius = RadialDamageOuterRadius;
 	}
 	return Params;
 }

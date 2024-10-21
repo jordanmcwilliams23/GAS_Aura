@@ -16,11 +16,13 @@
 #include "Aura/Aura.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/DecalComponent.h"
 #include "Components/SplineComponent.h"
 #include "GameFramework/Actor.h"
 #include "UI/Widget/DamageTextComponent.h"
 #include "Containers/Set.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 AAuraPlayerController::AAuraPlayerController()
@@ -33,6 +35,7 @@ void AAuraPlayerController::PlayerTick(const float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
 	CursorTrace();
+	UpdateMagicCircleLocation();
 
 	if (!bAutoRunning) return;
 	AutoRun();
@@ -282,6 +285,20 @@ void AAuraPlayerController::MenuClosed()
 		SetInputMode(GameAndUIInputMode);
 }
 
+void AAuraPlayerController::ShowTargetingActor(TSubclassOf<ATargetingActor> TargetingActorClass, const bool bInShow, UMaterialInterface* Material, float Radius)
+{
+	if (bInShow && !IsValid(TargetingActor))
+	{
+		const FVector TargetingActorLocation = CursorHit.ImpactPoint;
+		TargetingActor = GetWorld()->SpawnActor<ATargetingActor>(TargetingActorClass, TargetingActorLocation, FRotator::ZeroRotator);
+		if (Material)
+			TargetingActor->GetDecalComponent()->SetMaterial(0, Material);
+		if (Radius != 0.f)
+			TargetingActor->SetTargetingSphereRadius(Radius);
+	} else if (IsValid(TargetingActor))
+		TargetingActor->Destroy();
+}
+
 bool AAuraPlayerController::HideOccludedActor(const AActor* Actor)
 {
   FCameraOccludedActor* ExistingOccludedActor = OccludedActors.Find(Actor);
@@ -331,7 +348,19 @@ void AAuraPlayerController::ForceShowOccludedActors()
 	    }
 	  }
 	}
-	 
+
+void AAuraPlayerController::UpdateMagicCircleLocation() const
+{
+	if (IsValid(TargetingActor))
+	{
+		if (FHitResult HitResult; GetHitResultUnderCursor(ECC_IgnorePawns, false, HitResult))
+		{
+			TargetingActor->SetActorLocation(HitResult.Location);
+			TargetingActor->SetActorRotation(HitResult.Normal.Rotation());
+		}
+	}
+}
+
 void AAuraPlayerController::ShowOccludedActor(FCameraOccludedActor& OccludedActor)
 	{
 	  if (!IsValid(OccludedActor.Actor))

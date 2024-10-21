@@ -22,12 +22,12 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 	});
 	
 	GetAuraASC()->AbilityEquipped.AddUObject(this, &USpellMenuWidgetController::OnAbilityEquipped);
-	
-	GetAuraPS()->OnSpellPointsChangedDelegate.AddLambda(
+	GetAuraPS()->OnSpellPointsChangedDelegate.AddDynamic(this, &USpellMenuWidgetController::OnSpellPointsChanged);
+	/*GetAuraPS()->OnSpellPointsChangedDelegate.AddLambda(
 		[this](const int32 SpellPoints)
 		{
 			SpellPointsChangedDelegate.Broadcast(SpellPoints);
-		});
+		}); */
 }
 
 void USpellMenuWidgetController::BroadcastInitialValues()
@@ -39,6 +39,7 @@ void USpellMenuWidgetController::BroadcastInitialValues()
 void USpellMenuWidgetController::SpendPointButtonPressed(const FGameplayTag& AbilityTag)
 {
 	GetAuraASC()->ServerSpendSpellPoint(AbilityTag);
+	SpellPointsChangedDelegate.Broadcast(GetAuraPS()->GetSpellPoints());
 }
 
 void USpellMenuWidgetController::EquipButtonPressed(const FGameplayTag& AbilityTag, const FGameplayTag& InputTag)
@@ -69,4 +70,9 @@ void USpellMenuWidgetController::OnAbilityEquipped(const FGameplayTag& AbilityTa
 	Info.InputTag = InputTag;
 	AbilityInfoDelegate.Broadcast(Info);
 	SuccessfullyEquippedAbility.Broadcast();
+}
+
+void USpellMenuWidgetController::OnSpellPointsChanged(const int32 SpellPoints)
+{
+	SpellPointsChangedDelegate.Broadcast(SpellPoints);
 }

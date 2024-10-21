@@ -162,14 +162,21 @@ void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 	SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
 	if (NewHealth > 0.f)
 	{
-		if (UAuraAbilitySystemLibrary::GetShouldHitReact(Props.EffectContextHandle))
+		//Check if should hit react and is not being shocked
+		if (UAuraAbilitySystemLibrary::GetShouldHitReact(Props.EffectContextHandle) &&
+			Props.TargetCharacter->Implements<UCombatInterface>() &&
+			!ICombatInterface::Execute_IsBeingShocked(Props.TargetCharacter))
 		{
 			//Hit React
 			Props.TargetASC->TryActivateAbilitiesByTag(FGameplayTagContainer(FAuraGameplayTags::Get().Abilities_HitReact));
-			const FVector KnockbackForce = UAuraAbilitySystemLibrary::GetKnockbackForce(Props.EffectContextHandle);
-			const float KnockbackChance = UAuraAbilitySystemLibrary::GetKnockbackChance(Props.EffectContextHandle);
-			if (UAuraAbilitySystemLibrary::RNGRoll(KnockbackChance) && !KnockbackForce.IsNearlyZero(10.f))
-				Props.TargetCharacter->LaunchCharacter(KnockbackForce, true, true);
+		}
+
+		//Check Knockback
+		const FVector KnockbackForce = UAuraAbilitySystemLibrary::GetKnockbackForce(Props.EffectContextHandle);
+        const float KnockbackChance = UAuraAbilitySystemLibrary::GetKnockbackChance(Props.EffectContextHandle);
+		if (UAuraAbilitySystemLibrary::RNGRoll(KnockbackChance) && !KnockbackForce.IsNearlyZero(1.f))
+		{
+			Props.TargetCharacter->LaunchCharacter(KnockbackForce, true, true);
 		}
 	} else if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor))
 	{

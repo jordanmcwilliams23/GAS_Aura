@@ -27,11 +27,12 @@ void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 		{
 			AttributePointsChangedDelegate.Broadcast(AttributePoints);
 		});
-	GetAuraPS()->OnSpellPointsChangedDelegate.AddLambda(
+	/* GetAuraPS()->OnSpellPointsChangedDelegate.AddLambda(
 		[this](const int32 SpellPoints)
 	{
 		SpellPointsChangedDelegate.Broadcast(SpellPoints);
-	});
+	}); */
+	GetAuraPS()->OnSpellPointsChangedDelegate.AddDynamic(this, &UAttributeMenuWidgetController::OnSpellPointsChanged);
 }
 
 void UAttributeMenuWidgetController::BroadcastInitialValues()
@@ -60,4 +61,9 @@ void UAttributeMenuWidgetController::BroadcastAttributeInfo(const FGameplayTag& 
 	FAuraAttributeInfo Info = AttributeInfo->FindAttributeTagInfo(Tag);
 	Info.AttributeValue = Info.AttributeGetter.GetNumericValue(AttributeSet);
 	AttributeInfoDelegate.Broadcast(Info);
+}
+
+void UAttributeMenuWidgetController::OnSpellPointsChanged(const int32 SpellPoints)
+{
+	SpellPointsChangedDelegate.Broadcast(SpellPoints);
 }

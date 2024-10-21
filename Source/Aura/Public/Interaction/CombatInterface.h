@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "GameplayTagContainer.h"
+#include "Aura/AuraTypes.h"
 #include "CombatInterface.generated.h"
 
 enum class ECharacterClass : uint8;
@@ -94,4 +95,12 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SetInShockLoop(const bool InLoop);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	bool IsBeingShocked() const;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SetBeingShocked(const bool InBeingShocked);
+
+	virtual FOnFloatChangedSignature& GetOnDamageSignature() = 0;
 };
