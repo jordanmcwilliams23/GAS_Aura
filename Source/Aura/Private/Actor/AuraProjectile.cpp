@@ -32,6 +32,11 @@ AAuraProjectile::AAuraProjectile()
 	ProjectileMovement->ProjectileGravityScale = 0.f;
 }
 
+void AAuraProjectile::EmptyIgnoreList()
+{
+	IgnoreList.Empty();
+}
+
 void AAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();
@@ -64,8 +69,7 @@ void AAuraProjectile::Destroyed()
 void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& HitResult)
 {
-	//Don't hit owning actor or actors on same team
-	if (OtherActor == GetOwner() || !UAuraAbilitySystemLibrary::IsNotFriend(GetOwner(), OtherActor)) return;
+	if(!IsValidOverlap(OtherActor)) return;
 	if (!bHit) OnHit();
 
 	if (HasAuthority())
@@ -86,5 +90,11 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 		}
 		Destroy();
 	} else { bHit = true; }
+}
+
+bool AAuraProjectile::IsValidOverlap(const AActor* OtherActor) const
+{
+	//Don't hit owning actor or actors on same team
+	return OtherActor != GetOwner() && UAuraAbilitySystemLibrary::IsNotFriend(GetOwner(), OtherActor) && !IgnoreList.Contains(OtherActor);
 }
 

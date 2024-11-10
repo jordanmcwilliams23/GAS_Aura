@@ -103,4 +103,7 @@ public:
 	void SetBeingShocked(const bool InBeingShocked);
 
 	virtual FOnFloatChangedSignature& GetOnDamageSignature() = 0;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	UAnimMontage* GetSummonMontage() const;
 };

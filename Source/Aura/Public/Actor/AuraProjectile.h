@@ -28,30 +28,38 @@ public:
 	UPROPERTY()
 	TObjectPtr<USceneComponent> HomingTargetSceneComponent;
 
+	UFUNCTION(BlueprintCallable)
+	void EmptyIgnoreList();
+
+	UPROPERTY(BlueprintReadWrite)
+	TArray<AActor*> IgnoreList;
+
 protected:
 	virtual void BeginPlay() override;
-	void OnHit();
+	virtual void OnHit();
 	virtual void Destroyed() override;
 
 	UFUNCTION()
-	void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& HitResult);
+	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& HitResult);
 
+	bool IsValidOverlap(const AActor* OtherActor) const;
+
+	bool bHit = false;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UNiagaraSystem> ImpactEffect;
+                      
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USoundBase> ImpactSound;
+	
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USoundBase> LoopingSpawnSound;
 private:
 
 	UPROPERTY(EditDefaultsOnly)
 	float LifeSpan = 10.f;
-
-	bool bHit = false;
 	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USphereComponent> Sphere;
 
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UNiagaraSystem> ImpactEffect;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<USoundBase> ImpactSound;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<USoundBase> LoopingSpawnSound;
+	
 };
