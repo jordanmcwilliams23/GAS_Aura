@@ -9,32 +9,26 @@
   <component name="ChangeListManager">
     <list default="true" id="56a28984-566e-4589-bbc0-40cbd4b862e7" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Aura.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Aura.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Aura.uproject" beforeDir="false" afterPath="$PROJECT_DIR$/Aura.uproject" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Assets/Enemies/Shaman/Animations/AM_Shaman_Summon.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Assets/Enemies/Shaman/Animations/AM_Shaman_Summon.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Assets/Sounds/Music/Music_MainMenu.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Assets/Sounds/Music/Music_MainMenu.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Assets/UI/Borders/BorderLarge/Border_Large.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Assets/UI/Borders/BorderLarge/Border_Large.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Assets/UI/Borders/BorderLarge/Border_Large_png.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Assets/UI/Borders/BorderLarge/Border_Large_png.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Assets/UI/Globes/M_FlowingUIBG.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Assets/UI/Globes/M_FlowingUIBG.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Assets/UI/Spells/FireBlast.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Assets/UI/Spells/FireBlast.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/AI/Tasks/BTT_Attack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/AI/Tasks/BTT_Attack.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/AbilitySystem/Aura/Abilities/Fire/Fireblast/GA_FireBlast.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/AbilitySystem/Aura/Abilities/Fire/Fireblast/GA_FireBlast.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/AbilitySystem/Data/CurveTables/CT_Damage.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/AbilitySystem/Data/CurveTables/CT_Damage.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/AbilitySystem/Enemy/Abilities/GA_MeleeAttack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/AbilitySystem/Enemy/Abilities/GA_MeleeAttack.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/AbilitySystem/Enemy/Abilities/GA_RangedAttack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/AbilitySystem/Enemy/Abilities/GA_RangedAttack.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/AbilitySystem/Enemy/Abilities/GA_SummonAbility.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/AbilitySystem/Enemy/Abilities/GA_SummonAbility.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Character/Shaman/BP_Shaman.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Character/Shaman/BP_Shaman.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/UI/SpellGlobes/WBP_SpellGlobe.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/UI/SpellGlobes/WBP_SpellGlobe.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Maps/Dungeon.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/Dungeon.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Aura/Private/Actor/AuraFireball.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Private/Actor/AuraFireball.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Aura/Private/Actor/AuraProjectile.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Private/Actor/AuraProjectile.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Aura/Private/AuraGameplayTags.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Private/AuraGameplayTags.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Game/BP_AuraGameModeBase.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Game/BP_AuraGameModeBase.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Game/BP_LoadScreenGameMode.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Game/BP_LoadScreenGameMode.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/MainMenu/BP_AuraMainMenu.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/MainMenu/BP_AuraMainMenu.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/UI/Button/WBP_WideButton.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/UI/Button/WBP_WideButton.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/UI/LoadMenu/WBP_LoadScreen.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/UI/LoadMenu/WBP_LoadScreen.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/UI/LoadMenu/WBP_LoadScreenWidgetBase.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/UI/LoadMenu/WBP_LoadScreenWidgetBase.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/UI/LoadMenu/WBP_LoadSlot_Enter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/UI/LoadMenu/WBP_LoadSlot_Enter.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/UI/LoadMenu/WBP_LoadSlot_Taken.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/UI/LoadMenu/WBP_LoadSlot_Taken.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/UI/LoadMenu/WBP_LoadSlot_Vacant.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/UI/LoadMenu/WBP_LoadSlot_Vacant.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/UI/LoadMenu/WBP_LoadSlot_WidgetSwitcher.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/UI/LoadMenu/WBP_LoadSlot_WidgetSwitcher.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Maps/MainMenu.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/MainMenu.umap" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Aura/Private/Game/AuraGameModeBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Private/Game/AuraGameModeBase.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Aura/Public/Actor/AuraFireball.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Public/Actor/AuraFireball.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Aura/Public/Actor/AuraProjectile.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Public/Actor/AuraProjectile.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Aura/Public/AuraGameplayTags.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Public/AuraGameplayTags.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Aura/Private/Game/LoadScreenSaveGame.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Private/Game/LoadScreenSaveGame.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Aura/Private/UI/HUD/LoadScreenHUD.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Private/UI/HUD/LoadScreenHUD.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Aura/Private/UI/ViewModel/MVVM_LoadScreen.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Private/UI/ViewModel/MVVM_LoadScreen.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Aura/Private/UI/ViewModel/MVVM_LoadSlot.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Private/UI/ViewModel/MVVM_LoadSlot.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Aura/Public/Game/AuraGameModeBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Public/Game/AuraGameModeBase.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Aura/Public/Interaction/CombatInterface.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Public/Interaction/CombatInterface.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Aura/Public/Game/LoadScreenSaveGame.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Public/Game/LoadScreenSaveGame.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Aura/Public/UI/ViewModel/MVVM_LoadScreen.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Public/UI/ViewModel/MVVM_LoadScreen.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Aura/Public/UI/ViewModel/MVVM_LoadSlot.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Aura/Public/UI/ViewModel/MVVM_LoadSlot.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,6 +39,13 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
@@ -290,7 +291,12 @@
       <workItem from="1731084355687" duration="4669000" />
       <workItem from="1731173411915" duration="2307000" />
       <workItem from="1731190507852" duration="12442000" />
-      <workItem from="1731257413726" duration="2925000" />
+      <workItem from="1731257413726" duration="18317000" />
+      <workItem from="1731366314821" duration="601000" />
+      <workItem from="1731385028806" duration="71000" />
+      <workItem from="1731385189538" duration="3883000" />
+      <workItem from="1731434718074" duration="648000" />
+      <workItem from="1731440655475" duration="4891000" />
     </task>
     <servers />
   </component>

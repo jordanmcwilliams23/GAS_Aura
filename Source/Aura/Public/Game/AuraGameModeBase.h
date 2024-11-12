@@ -7,6 +7,7 @@
 #include "Interaction/GameModeInterface.h"
 #include "AuraGameModeBase.generated.h"
 
+class ULoadScreenSaveGame;
 class USaveGame;
 class UMVVM_LoadSlot;
 class ULevelUpInfo;
@@ -37,10 +38,26 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Ability Info")
 	TObjectPtr<UAbilityInfo> AbilityInfo;
 
-	void SaveSlotData(UMVVM_LoadSlot* LoadSlot,int32 SlotIndex);
+	void SaveSlotData(const UMVVM_LoadSlot* LoadSlot,int32 SlotIndex) const;
+	ULoadScreenSaveGame* GetSaveSlotData(const FString& SlotName, int32 SlotIndex) const;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<USaveGame> LoadScreenSaveGameClass;
+
+	static void DeleteSlot(const FString& SlotName, int32 SlotIndex);
+
+	UPROPERTY(EditDefaultsOnly)
+	FString DefaultMapName;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSoftObjectPtr<UWorld> DefaultMap;
+
+	UPROPERTY(EditDefaultsOnly)
+	TMap<FString, TSoftObjectPtr<UWorld>> Levels;
+
+	void TravelToMap(const UMVVM_LoadSlot* LoadSlot);
+protected:
+	virtual void BeginPlay() override;
 private:
 	TArray<AAuraPlayerController*> PlayerControllers;
 

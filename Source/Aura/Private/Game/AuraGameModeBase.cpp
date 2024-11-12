@@ -46,13 +46,50 @@ TArray<AAuraPlayerController*> AAuraGameModeBase::GetAuraPlayerControllers() con
 	return PlayerControllers;
 }
 
-void AAuraGameModeBase::SaveSlotData(UMVVM_LoadSlot* LoadSlot, int32 SlotIndex)
+void AAuraGameModeBase::SaveSlotData(const UMVVM_LoadSlot* LoadSlot, const int32 SlotIndex) const
 {
 	if (UGameplayStatics::DoesSaveGameExist(LoadSlot->GetLoadSlotName(), SlotIndex))
 	{
 		UGameplayStatics::DeleteGameInSlot(LoadSlot->GetLoadSlotName(), SlotIndex);
 	}
-	ULoadScreenSaveGame* LoadScreenSaveGame = Cast<ULoadScreenSaveGame>(UGameplayStatics::CreateSaveGameObject(LoadScreenSaveGameClass));
+	USaveGame* SaveGameObject = UGameplayStatics::CreateSaveGameObject(LoadScreenSaveGameClass);
+	ULoadScreenSaveGame* LoadScreenSaveGame = Cast<ULoadScreenSaveGame>(SaveGameObject);
 	LoadScreenSaveGame->PlayerName = LoadSlot->GetPlayerName();
+	LoadScreenSaveGame->SaveSlotStatus = Taken;
+	LoadScreenSaveGame->MapName = LoadSlot->GetMapName();
+
 	UGameplayStatics::SaveGameToSlot(LoadScreenSaveGame, LoadSlot->GetLoadSlotName(), SlotIndex);
+}
+
+ULoadScreenSaveGame* AAuraGameModeBase::GetSaveSlotData(const FString& SlotName, const int32 SlotIndex) const
+{
+	USaveGame* SaveGameObject;
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, SlotIndex))
+	{
+		SaveGameObject = UGameplayStatics::LoadGameFromSlot(SlotName, SlotIndex);
+	} else
+	{
+		SaveGameObject = UGameplayStatics::CreateSaveGameObject(LoadScreenSaveGameClass);
+	}
+	ULoadScreenSaveGame* LoadScreenSaveGame = Cast<ULoadScreenSaveGame>(SaveGameObject);
+	return LoadScreenSaveGame;
+}
+
+void AAuraGameModeBase::DeleteSlot(const FString& SlotName, int32 SlotIndex)
+{
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, SlotIndex))
+	{
+		UGameplayStatics::DeleteGameInSlot(SlotName, SlotIndex);
+	}
+}
+
+void AAuraGameModeBase::TravelToMap(const UMVVM_LoadSlot* LoadSlot)
+{
+	UGameplayStatics::OpenLevelBySoftObjectPtr(LoadSlot, Levels.FindChecked(LoadSlot->GetMapName()));
+}
+
+void AAuraGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();
+	Levels.Add(DefaultMapName, DefaultMap);
 }
