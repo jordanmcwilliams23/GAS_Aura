@@ -56,6 +56,11 @@ public:
 	TMap<FString, TSoftObjectPtr<UWorld>> Levels;
 
 	void TravelToMap(const UMVVM_LoadSlot* LoadSlot);
+
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+
+	UPROPERTY(EditDefaultsOnly)
+	FName DefaultPlayerStartTag;
 protected:
 	virtual void BeginPlay() override;
 private:
