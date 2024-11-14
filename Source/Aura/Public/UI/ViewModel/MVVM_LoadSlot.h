@@ -32,6 +32,9 @@ public:
 	UPROPERTY()
 	int32 SlotIndex;
 
+	UPROPERTY()
+	FName PlayerStartTag;
+
 	void SetLoadSlotName(FString InLoadSlotName);
 	void SetPlayerName(FString InPlayerName);
 	void SetMapName(FString InMapName);
