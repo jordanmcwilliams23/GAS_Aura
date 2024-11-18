@@ -12,6 +12,8 @@ class UAuraAbilitySystemComponent;
 class UAbilityInfo;
 class UAuraUserWidget;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnLevelUp, int32, CurrentLevel , bool, bLevelUp);
+
 USTRUCT(BlueprintType)
 struct FUIWidgetRow: public FTableRowBase
 {
@@ -60,7 +62,7 @@ public:
 	FOnFloatChangedSignatureDyn OnXPPercentChangedDelegate;
 
 	UPROPERTY(BlueprintAssignable, Category="GAS|Level")
-	FOnInt32ChangedSignatureDyn OnPlayerLevelChangedDelegate;
+	FOnLevelUp OnPlayerLevelChangedDelegate;
 
 	UPROPERTY(BlueprintAssignable, Category="GAS|Messages")
 	FMessageWidgetRowSignature OnMessageWidgetRow;

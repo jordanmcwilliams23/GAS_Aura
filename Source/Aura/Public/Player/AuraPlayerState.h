@@ -15,6 +15,7 @@ class ULevelUpInfo;
 class UAbilitySystemComponent;
 class UAuraAttributeSet;
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLevelChanged, int32 /* Current Level */, bool /* LevelUp? */)
 /**
  * 
  */
@@ -34,19 +35,20 @@ public:
 	FORCEINLINE int32 GetSpellPoints() const {return SpellPoints;}
 	
 	FOnInt32ChangedSignature OnXPChangedDelegate;
-	FOnInt32ChangedSignature OnLevelChangedDelegate;
+	FOnLevelChanged OnLevelChangedDelegate;
 	FOnInt32ChangedSignature OnAttributePointsChangedDelegate;
 	FOnInt32ChangedSignatureDyn OnSpellPointsChangedDelegate;
 
 	void SetXP(const int32 NewXP) { XP = NewXP; OnXPChangedDelegate.Broadcast(XP); }
 	void AddXP(const int32 AddedXP);
 
-	void AddAttributePoints(int32 Points);
-	void SetAttributePoints(int32 Points);
-	void AddSpellPoints(int32 Points);
+	void AddAttributePoints(const int32 Points);
+	void SetAttributePoints(const int32 Points);
+	void AddSpellPoints(const int32 Points);
+	void SetSpellPoints(const int32 Points);
 
-	void SetLevel(const int32 NewLevel) { Level = NewLevel; OnLevelChangedDelegate.Broadcast(Level);}
-	void AddLevel(const int32 AddedLevels) { Level += AddedLevels; OnLevelChangedDelegate.Broadcast(Level);}
+	void SetLevel(const int32 NewLevel) { Level = NewLevel; OnLevelChangedDelegate.Broadcast(Level, false);}
+	void AddLevel(const int32 AddedLevels) { Level += AddedLevels; OnLevelChangedDelegate.Broadcast(Level, true);}
 
 	ULevelUpInfo* GetLevelUpInfo() const {return LevelUpInfo; };
 	

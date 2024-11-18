@@ -5,6 +5,7 @@
 
 #include "Components/DecalComponent.h"
 #include "Components/SphereComponent.h"
+#include "Interaction/HighlightInterface.h"
 #include "Interaction/TargetInterface.h"
 
 ATargetingActor::ATargetingActor()
@@ -36,18 +37,18 @@ void ATargetingActor::OnTargetingBeginOverlap(
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	if (ITargetInterface* TargetInterface = Cast<ITargetInterface>(OtherActor))
+	if (OtherActor->Implements<UHighlightInterface>())
 	{
-		TargetInterface->HighlightActor();
+		IHighlightInterface::Execute_HighlightActor(OtherActor);
 	}
 }
 
 void ATargetingActor::OnTargetingEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (ITargetInterface* TargetInterface = Cast<ITargetInterface>(OtherActor))
+	if (OtherActor->Implements<UHighlightInterface>())
 	{
-		TargetInterface->UnhighlightActor();
+		IHighlightInterface::Execute_UnhighlightActor(OtherActor);
 	}
 }
 

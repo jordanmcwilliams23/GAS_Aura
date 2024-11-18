@@ -33,6 +33,10 @@ public:
 	virtual UCharacterClassInfo* GetCharacterClassInfo() const override;
 	UFUNCTION()
 	virtual TArray<AAuraPlayerController*> GetAuraPlayerControllers() const override;
+	UFUNCTION()
+	virtual void SaveWorldState(UWorld* World) const override;
+	UFUNCTION()
+	virtual void LoadWorldState(UWorld* World) const override;
 	/* End Game Mode Interface */
 
 	UPROPERTY(EditDefaultsOnly, Category="Ability Info")
@@ -61,6 +65,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	FName DefaultPlayerStartTag;
+
+	ULoadScreenSaveGame* RetrieveInGameSaveData() const;
+	void SaveInGameProgressData(ULoadScreenSaveGame* SaveObject);
 protected:
 	virtual void BeginPlay() override;
 private:

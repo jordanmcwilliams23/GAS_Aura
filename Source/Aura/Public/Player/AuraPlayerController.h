@@ -8,6 +8,7 @@
 #include "Interaction/PlayerControllerInterface.h"
 #include "AuraPlayerController.generated.h"
 
+class IHighlightInterface;
 class UNiagaraSystem;
 class UDamageTextComponent;
 struct FInputActionInstance;
@@ -15,9 +16,15 @@ struct FGameplayTag;
 class UAuraInputConfig;
 class UInputMappingContext;
 class UInputAction;
-class ITargetInterface;
 class UAuraAbilitySystemComponent;
 class USplineComponent;
+
+enum class ETargetingStatus : uint8
+{
+	TargetingEnemy,
+	TargetingNonenemy,
+	NotTargeting
+};
 
 USTRUCT(BlueprintType)
 struct FCameraOccludedActor
@@ -116,7 +123,7 @@ private:
 	float FollowTime = 0.f;
 	float ShortPressThreshold = 0.5f;
 	bool bAutoRunning = false;
-	bool bTargeting = false;
+	ETargetingStatus TargetingStatus = ETargetingStatus::NotTargeting;
 
 	UPROPERTY(EditDefaultsOnly)
 	float AutoRunAcceptanceRadius = 50.f;
@@ -132,8 +139,12 @@ private:
 
 	void Move(const struct FInputActionValue& InputActionValue);
 	void CursorTrace();
-	TScriptInterface<ITargetInterface> LastActor;
-	TScriptInterface<ITargetInterface> CurrentActor;
+	TObjectPtr<AActor> LastActor;
+	TObjectPtr<AActor> CurrentActor;
+
+	static void HighlightActor(AActor* InActor);
+	static void UnhighlightActor(AActor* InActor);
+
 
 	void AbilityInputTagPressed(const FInputActionInstance& Instance, FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);

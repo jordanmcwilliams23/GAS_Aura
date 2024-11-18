@@ -30,19 +30,26 @@ AAuraEnemy::AAuraEnemy()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	
 	GetMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
+	GetMesh()->MarkRenderStateDirty();
 	Weapon->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
+	Weapon->MarkRenderStateDirty();
 }
 
-void AAuraEnemy::HighlightActor()
+void AAuraEnemy::HighlightActor_Implementation()
 {
 	GetMesh()->SetRenderCustomDepth(true);
 	Weapon->SetRenderCustomDepth(true);
 }
 
-void AAuraEnemy::UnhighlightActor()
+void AAuraEnemy::UnhighlightActor_Implementation()
 {
 	GetMesh()->SetRenderCustomDepth(false);
 	Weapon->SetRenderCustomDepth(false);
+}
+
+bool AAuraEnemy::SetMoveToLocation_Implementation(FVector& OutDestination)
+{
+	return false;
 }
 
 void AAuraEnemy::SetCombatTarget_Implementation(AActor* NewCombatTarget)

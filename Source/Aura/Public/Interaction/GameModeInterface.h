@@ -34,4 +34,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual TArray<AAuraPlayerController*> GetAuraPlayerControllers() const = 0;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void SaveWorldState(UWorld* World) const = 0;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void LoadWorldState(UWorld* World) const = 0;
 };

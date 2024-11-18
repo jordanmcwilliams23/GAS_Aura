@@ -9,12 +9,39 @@
 #include "AbilitySystem/Abilities/AuraGameplayAbility.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/AuraLogChannels.h"
+#include "Game/LoadScreenSaveGame.h"
 #include "Interaction/PlayerInterface.h"
 #include "Player/AuraPlayerState.h"
 
 void UAuraAbilitySystemComponent::AbilityActorInfoSet()
 {
 	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &UAuraAbilitySystemComponent::ClientEffectApplied);
+}
+
+void UAuraAbilitySystemComponent::AddCharacterAbilitiesFromSaveData(ULoadScreenSaveGame* SaveData)
+{
+	for (const FSavedAbility& SavedAbility : SaveData->SavedAbilities)
+	{
+		const TSubclassOf<UGameplayAbility> StartupAbilityClass = SavedAbility.GameplayAbilityClass;
+
+		FGameplayAbilitySpec LoadedAbilitySpec = FGameplayAbilitySpec(StartupAbilityClass, SavedAbility.AbilityLevel);
+		LoadedAbilitySpec.DynamicAbilityTags.AddTag(SavedAbility.AbilitySlot);
+		LoadedAbilitySpec.DynamicAbilityTags.AddTag(SavedAbility.AbilityStatus);
+		if (SavedAbility.AbilityType == FAuraGameplayTags::Get().Abilities_Type_Offensive)
+		{
+			GiveAbility(LoadedAbilitySpec);
+		} else if (SavedAbility.AbilityType == FAuraGameplayTags::Get().Abilities_Type_Passive)
+		{
+			GiveAbility(LoadedAbilitySpec);
+			//Only activate passive ability if it's equipped
+			if (SavedAbility.AbilityStatus.MatchesTagExact(FAuraGameplayTags::Get().Abilities_Status_Equipped))
+			{
+				TryActivateAbility(LoadedAbilitySpec.Handle);
+			}
+		}
+	}
+	bStartupAbilitiesGiven = true;
+	AbilitiesGivenDelegate.Broadcast();
 }
 
 void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& Abilities)
@@ -39,6 +66,7 @@ void UAuraAbilitySystemComponent::AddCharacterPassiveAbilities(const TArray<TSub
 	{
 		FGameplayAbilitySpec Spec(AbilityClass, 1.f);
 		GiveAbilityAndActivateOnce(Spec);
+		Spec.DynamicAbilityTags.AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
 	}
 }
 
@@ -298,19 +326,10 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamep
 					MulticastActivatePassiveEffect(AbilityTag, true);
 					TryActivateAbility(Spec->Handle);
 				}
+				Spec->DynamicAbilityTags.RemoveTag(GetStatusTagFromSpec(*Spec));
+				Spec->DynamicAbilityTags.AddTag(Tags.Abilities_Status_Equipped);
 			}
 			AssignSlotToAbility(*Spec, InputTag);
-			/*
-			//Remove this input tag from the old ability that has it
-			ClearAbilitiesOfSlot(InputTag);
-			//clear this current ability's input, just in case it's a different slot
-			ClearSlot(Spec);
-			Spec->DynamicAbilityTags.AddTag(InputTag);
-			if (Status.MatchesTagExact(Tags.Abilities_Status_Unlocked))
-			{
-				Spec->DynamicAbilityTags.RemoveTag(Tags.Abilities_Status_Unlocked);
-				Spec->DynamicAbilityTags.AddTag(Tags.Abilities_Status_Equipped);
-			} */
 			MarkAbilitySpecDirty(*Spec);
 		}
 		ClientEquipAbility(AbilityTag, Tags.Abilities_Status_Equipped, InputTag, PrevInput);
@@ -389,12 +408,9 @@ bool UAuraAbilitySystemComponent::GetDescriptionsByAbilityTag(const FGameplayTag
 {
 	if (const FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
 	{
-		if (UAuraGameplayAbility* AuraGameplayAbility = Cast<UAuraGameplayAbility>(AbilitySpec->Ability))
-		{
-			OutDescription = UAuraAbilitySystemLibrary::GetAbilityDescription(GetAvatarActor(), AbilityTag, AbilitySpec->Level);
-			OutNextDescription = UAuraAbilitySystemLibrary::GetAbilityNextLevelDescription(GetAvatarActor(), AbilityTag, AbilitySpec->Level);
-			return true;
-		}
+		OutDescription = UAuraAbilitySystemLibrary::GetAbilityDescription(GetAvatarActor(), AbilityTag, AbilitySpec->Level);
+		OutNextDescription = UAuraAbilitySystemLibrary::GetAbilityNextLevelDescription(GetAvatarActor(), AbilityTag, AbilitySpec->Level);
+		return true;
 	}
 	//Failed to find activatable ability ie. must be locked
 	UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());

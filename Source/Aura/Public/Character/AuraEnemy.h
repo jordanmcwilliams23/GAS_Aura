@@ -6,6 +6,7 @@
 #include "Character/AuraCharacterBase.h"
 #include "Interaction/TargetInterface.h"
 #include "Aura/AuraTypes.h"
+#include "Interaction/HighlightInterface.h"
 #include "AuraEnemy.generated.h"
 
 class UWidgetComponent;
@@ -15,15 +16,19 @@ class AAuraAIController;
  * 
  */
 UCLASS()
-class AURA_API AAuraEnemy : public AAuraCharacterBase, public ITargetInterface
+class AURA_API AAuraEnemy : public AAuraCharacterBase, public ITargetInterface, public IHighlightInterface
 {
 	GENERATED_BODY()
 public:
 	AAuraEnemy();
 
+	/** Highlight Interface */
+	virtual void HighlightActor_Implementation() override;
+	virtual void UnhighlightActor_Implementation() override;
+	virtual bool SetMoveToLocation_Implementation(FVector& OutDestination) override;
+	/** End Highlight Interface */
+	
 	/** Target Interface */
-	virtual void HighlightActor() override;
-	virtual void UnhighlightActor() override;
 	FORCEINLINE virtual void SetCombatTarget_Implementation(AActor* NewCombatTarget) override;
 	FORCEINLINE virtual AActor* GetCombatTarget_Implementation() const override;
 	/** End Target Interface */

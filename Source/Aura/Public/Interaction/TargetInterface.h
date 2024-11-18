@@ -20,11 +20,7 @@ class AURA_API ITargetInterface
 {
 	GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void HighlightActor() = 0;
-	virtual void UnhighlightActor() = 0;
-
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	AActor* GetCombatTarget() const;
 
