@@ -167,6 +167,7 @@ void AAuraPlayerController::AbilityInputTagPressed(const FInputActionInstance& I
 
 void AAuraPlayerController::AbilityInputTagReleased(const FGameplayTag InputTag)
 {
+	//Check if input tag released is blocked
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputReleased)) return;
 	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB) && GetASC())
 	{
@@ -353,7 +354,7 @@ bool AAuraPlayerController::HideOccludedActor(const AActor* Actor)
   {
     UStaticMeshComponent* StaticMesh = Cast<UStaticMeshComponent>(
       Actor->GetComponentByClass(UStaticMeshComponent::StaticClass()));
- 
+	if (StaticMesh == nullptr) return false;
     FCameraOccludedActor OccludedActor;
     OccludedActor.Actor = Actor;
     OccludedActor.StaticMesh = StaticMesh;

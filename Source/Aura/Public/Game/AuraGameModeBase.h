@@ -34,7 +34,7 @@ public:
 	UFUNCTION()
 	virtual TArray<AAuraPlayerController*> GetAuraPlayerControllers() const override;
 	UFUNCTION()
-	virtual void SaveWorldState(UWorld* World) const override;
+	virtual void SaveWorldState(UWorld* World, const FString& DestinationMapAssetName = FString("")) const override;
 	UFUNCTION()
 	virtual void LoadWorldState(UWorld* World) const override;
 	/* End Game Mode Interface */
@@ -59,6 +59,8 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TMap<FString, TSoftObjectPtr<UWorld>> Levels;
 
+	FString GetMapNameFromMapAssetName(const FString& InMapAssetName) const;
+
 	void TravelToMap(const UMVVM_LoadSlot* LoadSlot);
 
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
@@ -67,7 +69,9 @@ public:
 	FName DefaultPlayerStartTag;
 
 	ULoadScreenSaveGame* RetrieveInGameSaveData() const;
-	void SaveInGameProgressData(ULoadScreenSaveGame* SaveObject);
+	void SaveInGameProgressData(ULoadScreenSaveGame* SaveObject) const;
+
+	void PlayerDied(const ACharacter* DeadCharacter) const;
 protected:
 	virtual void BeginPlay() override;
 private:

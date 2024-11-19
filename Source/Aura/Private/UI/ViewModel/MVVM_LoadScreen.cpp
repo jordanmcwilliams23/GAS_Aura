@@ -15,13 +15,19 @@ UMVVM_LoadSlot* UMVVM_LoadScreen::GetLoadSlotViewModelByIndex(const int32 Index)
 
 void UMVVM_LoadScreen::NewSlotButtonPressed(const int32 Slot, const FString& EnteredName)
 {
-	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+	const AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+	if (!IsValid(AuraGameMode))
+	{
+		GEngine->AddOnScreenDebugMessage(5, 15.f, FColor::Magenta, FString("Error: switch to single player"));
+		return;
+	}
 
 	UMVVM_LoadSlot* LoadSlot = LoadSlots[Slot];
 	LoadSlot->SetMapName(AuraGameMode->DefaultMapName);
 	LoadSlot->SetPlayerName(EnteredName);
 	LoadSlot->SlotStatus = Taken;
 	LoadSlot->SetPlayerLevel(1);
+	LoadSlot->MapAssetName = AuraGameMode->DefaultMap.ToSoftObjectPath().GetAssetName();
 
 	AuraGameMode->SaveSlotData(LoadSlot, Slot);
 	LoadSlot->InitializeSlot();
@@ -49,7 +55,7 @@ void UMVVM_LoadScreen::SelectSlotButtonPressed(const int32 Slot)
 
 void UMVVM_LoadScreen::LoadData()
 {
-	AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+	const AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
 	if (!IsValid(AuraGameMode)) return;
 	for (const TTuple<int32, UMVVM_LoadSlot*> LoadSlot : LoadSlots)
 	{
