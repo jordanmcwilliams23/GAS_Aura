@@ -135,17 +135,13 @@ void AAuraPlayerController::CursorTrace()
 void AAuraPlayerController::HighlightActor(AActor* InActor)
 {
 	if (IsValid(InActor) && InActor->Implements<UHighlightInterface>())
-	{
 		IHighlightInterface::Execute_HighlightActor(InActor);
-	}
 }
 
 void AAuraPlayerController::UnhighlightActor(AActor* InActor)
 {
 	if (IsValid(InActor) && InActor->Implements<UHighlightInterface>())
-	{
 		IHighlightInterface::Execute_UnhighlightActor(InActor);
-	}
 }
 
 void AAuraPlayerController::AbilityInputTagPressed(const FInputActionInstance& Instance, const FGameplayTag InputTag)
@@ -159,10 +155,8 @@ void AAuraPlayerController::AbilityInputTagPressed(const FInputActionInstance& I
 		TargetingStatus = ETargetingStatus::TargetingNonenemy;
 	}
 	bAutoRunning = false;
-	if (GetASC())
-	{
-		GetASC()->AbilityInputTagPressed(InputTag);
-	}
+	if (GetASC()) GetASC()->AbilityInputTagPressed(InputTag);
+	
 }
 
 void AAuraPlayerController::AbilityInputTagReleased(const FGameplayTag InputTag)

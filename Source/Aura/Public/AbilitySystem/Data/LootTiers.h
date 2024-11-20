@@ -16,7 +16,7 @@ struct FLootItem
 	TSubclassOf<AAuraEffectActor> LootClass;
 
 	UPROPERTY(EditAnywhere, Category= "LootTiers|Spawning")
-	float ChanceToSpawn = 0.f;
+	uint8 ChanceToSpawn = 0;
 
 	UPROPERTY(EditAnywhere, Category= "LootTiers|Spawning")
 	uint8 MaxNumToSpawn = 0;

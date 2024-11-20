@@ -4,6 +4,7 @@
 #include "Actor/AuraEffectActor.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "Aura/Aura.h"
 #include "GameFramework/RotatingMovementComponent.h"
 
 // Sets default values
@@ -14,7 +15,8 @@ AAuraEffectActor::AAuraEffectActor()
 
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
 	StaticMeshComponent->SetupAttachment(GetRootComponent());
-
+	StaticMeshComponent->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
+	
 	if (bRotate)
 	{
 		RotatingMovementComponent = CreateDefaultSubobject<URotatingMovementComponent>("RotatingMovementComponent");
@@ -24,15 +26,14 @@ AAuraEffectActor::AAuraEffectActor()
 
 void AAuraEffectActor::HighlightActor_Implementation()
 {
-	
+	StaticMeshComponent->SetRenderCustomDepth(true);
 }
 
 void AAuraEffectActor::UnhighlightActor_Implementation()
 {
-	IHighlightInterface::UnhighlightActor_Implementation();
+	StaticMeshComponent->SetRenderCustomDepth(false);
 }
 
-// Called when the game starts or when spawned
 void AAuraEffectActor::BeginPlay()
 {
 	Super::BeginPlay();
