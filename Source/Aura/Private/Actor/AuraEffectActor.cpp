@@ -4,12 +4,32 @@
 #include "Actor/AuraEffectActor.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "GameFramework/RotatingMovementComponent.h"
 
 // Sets default values
 AAuraEffectActor::AAuraEffectActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	SetRootComponent(CreateDefaultSubobject<USceneComponent>("RootComponent"));
+
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
+	StaticMeshComponent->SetupAttachment(GetRootComponent());
+
+	if (bRotate)
+	{
+		RotatingMovementComponent = CreateDefaultSubobject<URotatingMovementComponent>("RotatingMovementComponent");
+		RotatingMovementComponent->RotationRate = RotationRate;
+	}
+}
+
+void AAuraEffectActor::HighlightActor_Implementation()
+{
+	
+}
+
+void AAuraEffectActor::UnhighlightActor_Implementation()
+{
+	IHighlightInterface::UnhighlightActor_Implementation();
 }
 
 // Called when the game starts or when spawned
@@ -28,7 +48,7 @@ void AAuraEffectActor::ApplyEffectToTarget(AActor* Target, const TSubclassOf<UGa
 	FGameplayEffectContextHandle EffectContextHandle = TargetASC->MakeEffectContext();
 	EffectContextHandle.AddSourceObject(this);
 	const FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(GameplayEffectClass, ActorLevel, EffectContextHandle);
-	//const FActiveGameplayEffectHandle ActiveEffectHandle = TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+	const FActiveGameplayEffectHandle ActiveEffectHandle = TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
 	const bool bIsInfinite = EffectSpecHandle.Data.Get()->Def.Get()->DurationPolicy == EGameplayEffectDurationType::Infinite;
 	if (!bIsInfinite)
 	{

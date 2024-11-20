@@ -8,7 +8,8 @@
 
 class ULoadScreenSaveGame;
 struct FInputActionInstance;
-DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer& /*AssetTags*/)
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer& /* AssetTags */)
 DECLARE_MULTICAST_DELEGATE(FAbilitiesGiven)
 DECLARE_DELEGATE_OneParam(FForEachAbility, const FGameplayAbilitySpec&)
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FAbilityStatusChanged, const FGameplayTag& /* Ability Tag */, const FGameplayTag& /* Status Tag */, int32 /* Ability Level */)

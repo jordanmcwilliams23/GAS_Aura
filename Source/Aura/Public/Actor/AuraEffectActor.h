@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interaction/HighlightInterface.h"
 #include "AuraEffectActor.generated.h"
 
+class URotatingMovementComponent;
 class UAbilitySystemComponent;
 class UGameplayEffect;
 
@@ -25,13 +27,16 @@ enum class EEffectRemovalPolicy
 };
 
 UCLASS()
-class AURA_API AAuraEffectActor : public AActor
+class AURA_API AAuraEffectActor : public AActor, public IHighlightInterface
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
 	AAuraEffectActor();
+
+	virtual void HighlightActor_Implementation() override;
+	virtual void UnhighlightActor_Implementation() override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -73,6 +78,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Effects")
 	EEffectRemovalPolicy InfiniteEffectRemovalPolicy = EEffectRemovalPolicy::RemoveOnEndOverlap;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Effects")
-	float ActorLevel = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Effects", meta=(ExposeOnSpawn="true"))
+	int32 ActorLevel = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bRotate = true;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<URotatingMovementComponent> RotatingMovementComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator RotationRate = FRotator(0.f, 30.f, 0.f);
 };

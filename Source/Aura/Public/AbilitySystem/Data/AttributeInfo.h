@@ -23,7 +23,7 @@ struct FAuraAttributeInfo
 	FText AttributeDescription = FText();
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
-	FLinearColor AttributeColor = FLinearColor();
+	FLinearColor AttributeColor = FLinearColor(FColor::White);
 
 	UPROPERTY(BlueprintReadOnly)
 	float AttributeValue = 0.f;

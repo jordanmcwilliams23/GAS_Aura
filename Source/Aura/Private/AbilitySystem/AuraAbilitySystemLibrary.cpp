@@ -156,6 +156,13 @@ UCharacterClassInfo* UAuraAbilitySystemLibrary::GetCharacterClassInfo(const UObj
 	return nullptr;
 }
 
+ULootTiers* UAuraAbilitySystemLibrary::GetLootTiers(const UObject* WorldContext)
+{
+	if (const AAuraGameModeBase* GameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContext)))
+		return GameModeBase->LootTiers;
+	return nullptr;
+}
+
 UAbilityInfo* UAuraAbilitySystemLibrary::GetAbilityInfo(const UObject* WorldContext)
 {
 	if (const IGameStateInterface* GameStateInterface = Cast<IGameStateInterface>(UGameplayStatics::GetGameState(WorldContext)))
@@ -574,7 +581,7 @@ FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect(const 
 bool UAuraAbilitySystemLibrary::RNGRoll(const float ChanceSuccess)
 {
 	if (ChanceSuccess >= 100.f) return true;
-	const float Roll = FMath::RandRange(1.f, 100.f);
+	const float Roll = FMath::FRandRange(1.f, 100.f);
 	return ChanceSuccess >= Roll;
 }
 

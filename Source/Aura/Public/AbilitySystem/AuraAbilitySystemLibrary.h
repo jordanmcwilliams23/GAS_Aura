@@ -10,6 +10,7 @@
 #include "UI/WidgetController/AuraWidgetController.h"
 #include "AuraAbilitySystemLibrary.generated.h"
 
+class ULootTiers;
 class ULoadScreenSaveGame;
 class USpellMenuWidgetController;
 class AAuraHUD;
@@ -60,6 +61,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|CharacterClassDefaults", meta=(DefaultToSelf="WorldContext"))
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContext);
+	
+	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|LootTiers", meta=(DefaultToSelf="WorldContext"))
+	static ULootTiers* GetLootTiers(const UObject* WorldContext);
 	
 	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|CharacterClassDefaults", meta=(DefaultToSelf="WorldContext"))
 	static UAbilityInfo* GetAbilityInfo(const UObject* WorldContext);
