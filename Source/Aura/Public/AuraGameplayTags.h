@@ -57,6 +57,9 @@ public:
 	FGameplayTag Attributes_Meta_IncomingXP;
 	/* End Meta Attributes */
 
+	/* Status Tags */
+	FGameplayTag Status_Dead;
+
 	/* Input Tags */
 	FGameplayTag InputTag;
 	FGameplayTag InputTag_LMB;
@@ -151,6 +154,13 @@ public:
 
 	/* Gameplay Cue Tags */
 	FGameplayTag GameplayCue_FireBlast;
+	FGameplayTag GameplayCue_Regeneration;
+
+	/* Champion Tags */
+	FGameplayTag Champion_Regenerator_RegenDuration;
+	FGameplayTag Champion_Regenerator_RegenAmount;
+
+	
 	
 protected:
 private:

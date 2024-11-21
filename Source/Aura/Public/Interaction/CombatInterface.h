@@ -106,4 +106,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	UAnimMontage* GetSummonMontage() const;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void ReceivedDamage(const float Damage);
 };

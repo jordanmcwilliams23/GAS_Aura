@@ -87,7 +87,7 @@ UExecCalc_Damage::UExecCalc_Damage()
 	RelevantAttributesToCapture.Add(DamageStatics().PhysicalResistanceDef);
 }
 
-void UExecCalc_Damage::HandleDebuff(const FGameplayEffectCustomExecutionParameters& ExecutionParams, const FGameplayEffectSpec& OwningSpec, FAggregatorEvaluateParameters EvaluateParameters)
+void UExecCalc_Damage::HandleDebuff(const FGameplayEffectCustomExecutionParameters& ExecutionParams, const FGameplayEffectSpec& OwningSpec, const FAggregatorEvaluateParameters& EvaluateParameters)
 {
 	const FAuraGameplayTags& Tags = FAuraGameplayTags::Get();
 	const FGameplayTag& DamageType = UAuraAbilitySystemLibrary::GetDamageType(OwningSpec.GetContext());
@@ -140,12 +140,10 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	const UCharacterClassInfo* CharacterClassInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(SourceAvatar);
 
-	//Debuffs
 	HandleDebuff(ExecutionParams, OwningSpec, EvaluateParameters);
 	
 	const FGameplayTag DamageTypeTag = UAuraAbilitySystemLibrary::GetDamageType(EffectContextHandle);
 	const FGameplayTag ResistanceTag = Tags.DamageTypesToResistances[DamageTypeTag];
-	//checkf(DamageStatics().GetTagsToCaptureDef().Contains(ResistanceTag), TEXT("TagsToCaptureDefs does not contain tag [%s] in ExecCalc"), *ResistanceTag.ToString());
 	const FGameplayEffectAttributeCaptureDefinition CaptureDef = DamageStatics().GetTagsToCaptureDef()[ResistanceTag];
 
 	//Get Damage Set by caller
@@ -204,15 +202,19 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	const float EffectiveCriticalHitChance = SourceCriticalHitChance - TargetCriticalHitResistance * CriticalHitResistanceCoefficient;
 
 	//Check if it was a crit
-	if (const float RNG = FMath::RandRange(1, 100); EffectiveCriticalHitChance > RNG)
+	if (UAuraAbilitySystemLibrary::RNGRoll(EffectiveCriticalHitChance))
 	{
 		float SourceCriticalHitDamage = 0.f;
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().CriticalHitDamageDef, EvaluateParameters, SourceCriticalHitDamage);
 		if (SourceCriticalHitDamage < 0.f) SourceCriticalHitDamage = 0.f;
-		Damage += (Damage + SourceCriticalHitDamage/100.f);
+		Damage += Damage + SourceCriticalHitDamage / 100.f;
 		UAuraAbilitySystemLibrary::SetIsCriticalHit(EffectContextHandle, true);
 	}
 
+	if (TargetAvatar->Implements<UCombatInterface>())
+	{
+		ICombatInterface::Execute_ReceivedDamage(TargetAvatar, Damage);
+	}
 	const FGameplayModifierEvaluatedData EvaluatedData(UAuraAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, Damage);
 	OutExecutionOutput.AddOutputModifier(EvaluatedData);
 }

@@ -10,6 +10,7 @@
 #include "UI/Widget/AuraUserWidget.h"
 #include "AuraGameplayTags.h"
 #include "AI/AuraAIController.h"
+#include "Aura/AuraLogChannels.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -73,6 +74,12 @@ void AAuraEnemy::Die(const FVector& DeathImpulse)
 	if (AuraAIController) AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("Dead"), true);
 	SpawnLoot();
 	Super::Die(DeathImpulse);
+}
+
+void AAuraEnemy::ReceivedDamage_Implementation(const float Damage)
+{
+	if (OnDamageReceived.IsBound())
+		OnDamageReceived.Broadcast(Damage);
 }
 
 void AAuraEnemy::PossessedBy(AController* NewController)
@@ -148,7 +155,32 @@ void AAuraEnemy::InitAbilityActorInfo()
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 	if (HasAuthority())
 	{
-		InitializeDefaultAttributes();
+		//TODO Check if champion and perform set up
+		if (RollIsChampion())
+		{
+			const UCharacterClassInfo* CharacterClassInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(this);
+			const FChampionInfo ChampionInfo = CharacterClassInfo->ChampionInfo;
+			const float Multiplier = FMath::FRandRange(ChampionAttributeMultiplierRange.X, ChampionAttributeMultiplierRange.Y);
+			UAuraAbilitySystemLibrary::InitializeDefaultAttributesWithMultiplier(this, GetAbilitySystemComponent(), CharacterClass, Level, Multiplier);
+			EChampionType ChosenType = GetRandomChampionType();
+			switch (ChosenType)
+			{
+			case EChampionType::Regenerator:
+				OnDamageReceived.AddUObject(this, &AAuraEnemy::Regenerate);
+				break;
+			case EChampionType::Shooter:
+				break;
+			case EChampionType::Speedy:
+				break;
+			default:
+				break;
+					
+			}
+		} else
+		{
+			InitializeDefaultAttributes();
+		}
+		
 		UAuraAbilitySystemLibrary::InitializeDefaultAbilities(this, GetAbilitySystemComponent(), CharacterClass);
 	}
 	OnASCRegistered.Broadcast(AbilitySystemComponent);
@@ -159,5 +191,39 @@ void AAuraEnemy::InitAbilityActorInfo()
 void AAuraEnemy::InitializeDefaultAttributes() const
 {
 	UAuraAbilitySystemLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, GetAbilitySystemComponent());
+}
+
+bool AAuraEnemy::RollIsChampion() const
+{
+	return UAuraAbilitySystemLibrary::RNGRoll(ChanceToBeChampion.GetValueAtLevel(Level));
+}
+
+EChampionType AAuraEnemy::GetRandomChampionType()
+{
+	return EChampionType::Regenerator;
+	//uint8 RandomInt = FMath::RandRange(0, static_cast<uint8>(EChampionType::Speedy));
+	//return static_cast<EChampionType>(RandomInt);
+}
+
+void AAuraEnemy::Regenerate(const float Damage)
+{
+	if (!HasAuthority()) return;
+	const FChampionInfo ChampionInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(this)->ChampionInfo;
+	const UAuraAttributeSet* AuraAttributes = Cast<UAuraAttributeSet>(GetAttributeSet());
+	const float HealthPercentage = 100.f * AuraAttributes->GetHealth() / AuraAttributes->GetMaxHealth();
+	UE_LOG(LogAura, Display, TEXT("Enemy health percent: %f"), HealthPercentage);
+	if (HealthPercentage <= ChampionInfo.Regenerator_HealthPercentThreshold)
+	{
+		const FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
+		const FGameplayEffectSpecHandle Spec = GetAbilitySystemComponent()->MakeOutgoingSpec(ChampionInfo.RegenerationGameplayEffectClass, 1.f, ContextHandle);
+		Spec.Data->SetSetByCallerMagnitude(FAuraGameplayTags::Get().Champion_Regenerator_RegenDuration, ChampionInfo.Regenerator_RegenDuration);
+		const float RegenAmount = ChampionInfo.Regenerator_RegenPercent / 100.f * AuraAttributes->GetMaxHealth();
+		Spec.Data->SetSetByCallerMagnitude(FAuraGameplayTags::Get().Champion_Regenerator_RegenAmount, RegenAmount);
+		Spec.Data->Period = ChampionInfo.Regenerator_RegenPeriod;
+
+		GetAbilitySystemComponent()->ApplyGameplayEffectSpecToSelf(*Spec.Data);
+		//Rework this if multiple delegates need to use OnDamageReceived
+		this->OnDamageReceived.RemoveAll(this);
+	}
 }
 

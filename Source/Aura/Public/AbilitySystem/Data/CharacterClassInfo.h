@@ -31,6 +31,44 @@ struct FCharacterClassDefaultInfo
 
 	UPROPERTY(EditDefaultsOnly, Category="Class Defaults")
 	FScalableFloat XPAmount;
+
+	UPROPERTY(EditDefaultsOnly, Category="Class Defaults")
+	TObjectPtr<UCurveTable> ClassPrimaryAttributesTable;
+};
+
+//Struct to hold data for champion settings
+USTRUCT()
+struct FChampionInfo
+{
+	GENERATED_BODY()
+
+	//Regenerator
+	
+	UPROPERTY(EditDefaultsOnly, Category="Champion")
+	float Regenerator_HealthPercentThreshold = 33.f;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Champion")
+	float Regenerator_RegenDuration = 4.f;
+
+	UPROPERTY(EditDefaultsOnly, Category="Champion")
+	float Regenerator_RegenPeriod = 0.5f;
+
+	UPROPERTY(EditDefaultsOnly, Category="Champion")
+	float Regenerator_RegenPercent = 10.f;
+
+	UPROPERTY(EditDefaultsOnly, Category="Champion")
+	TSubclassOf<UGameplayEffect> RegenerationGameplayEffectClass;
+
+	//Shooter
+	UPROPERTY(EditDefaultsOnly, Category="Champion")
+	float Shooter_FireRate = 4.f;
+
+	UPROPERTY(EditDefaultsOnly, Category="Champion")
+	TSubclassOf<UGameplayAbility> Shooter_FireProjectileClass;
+	
+	//Speedy
+	UPROPERTY(EditDefaultsOnly, Category="Champion")
+	float Speedy_SpeedMultiplier = 1.35f;
 };
 /**
  * 
@@ -62,5 +100,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="Common Class Defaults")
 	TSubclassOf<UGameplayEffect> PrimaryAttributes_SetByCaller;
-	
+
+	UPROPERTY(EditDefaultsOnly, Category="Champion")
+	FChampionInfo ChampionInfo;
 };

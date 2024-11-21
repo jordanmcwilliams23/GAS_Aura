@@ -55,6 +55,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|CharacterClassDefaults")
 	static void InitializeDefaultAttributesFromDisc(const UObject* WorldContext, UAbilitySystemComponent* ASC, ULoadScreenSaveGame* SaveGame);
+
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|CharacterClassDefaults")
+	static void InitializeDefaultAttributesWithMultiplier(const UObject* WorldContext, UAbilitySystemComponent* ASC, const ECharacterClass Class, const int32 Level, const float Multiplier);
 	
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|CharacterClassDefaults")
 	static void InitializeDefaultAbilities(const UObject* WorldContext, UAbilitySystemComponent* ASC, ECharacterClass Class);

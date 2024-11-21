@@ -12,9 +12,21 @@
 class UWidgetComponent;
 class UBehaviorTree;
 class AAuraAIController;
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FDamageReceivedSignature, float /* Damage */)
 /**
  * 
  */
+
+UENUM()
+enum class EChampionType : uint8
+{
+	Regenerator = 0,
+	Shooter = 1,
+	Speedy = 2
+};
+
+
 UCLASS()
 class AURA_API AAuraEnemy : public AAuraCharacterBase, public ITargetInterface, public IHighlightInterface
 {
@@ -36,6 +48,7 @@ public:
 	/** Combat Interface */
 	virtual int32 GetCharacterLevel_Implementation() override;
 	virtual void Die(const FVector& DeathImpulse) override;
+	virtual void ReceivedDamage_Implementation(const float Damage) override;
 	/** End Combat Interface */
 
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
@@ -65,6 +78,8 @@ protected:
 	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
 	FOnFloatChangedSignatureDyn OnMaxHealthChanged;
 
+	FDamageReceivedSignature OnDamageReceived;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character Class Defaults")
 	int32 Level = 1;
 	
@@ -82,6 +97,23 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void SpawnLoot();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Champion")
+	bool bCanBeChampion = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Champion")
+	FScalableFloat ChanceToBeChampion;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Champion")
+	FVector2f ChampionAttributeMultiplierRange = FVector2f(1.2f, 2.f);
+
+	UFUNCTION(BlueprintCallable, Category="Champion")
+	bool RollIsChampion() const;
+
+	UFUNCTION(BlueprintCallable, Category="Champion")
+	static EChampionType GetRandomChampionType();
+
+	void Regenerate(const float Damage);
 private:
 	
 	UPROPERTY(EditDefaultsOnly)

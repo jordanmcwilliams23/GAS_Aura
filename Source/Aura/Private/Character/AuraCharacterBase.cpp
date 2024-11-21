@@ -124,6 +124,9 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation(const FVector& Deat
 {
 	UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation(), GetActorRotation());
 	bIsDead = true;
+
+	GetAbilitySystemComponent()->AddReplicatedLooseGameplayTag(FAuraGameplayTags::Get().Status_Dead);
+	
 	Weapon->SetSimulatePhysics(true);
 	Weapon->SetEnableGravity(true);
 	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);

@@ -43,6 +43,10 @@ void FAuraGameplayTags::InitializeNativeTags()
 	/* Meta Attributes */
 	GameplayTags.Attributes_Meta_IncomingXP = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attributes.Meta.IncomingXP"),
 			FString("Incoming XP meta tag"));
+
+	/* Status Tags */
+	GameplayTags.Status_Dead = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Status.Dead"),
+			FString("Applied to dead character"));
 	
 	/* Input Tags */
 	GameplayTags.InputTag = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag"),
@@ -181,4 +185,12 @@ FString("Tail"));
 	/* Gameplay Cue Tags */
 	GameplayTags.GameplayCue_FireBlast = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("GameplayCue.FireBlast"),
 		FString("GameplayCue Tag for FireBlast"));
+	GameplayTags.GameplayCue_FireBlast = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("GameplayCue.Regeneration"),
+		FString("GameplayCue Tag for Regenerator's Regeneration GC"));
+
+	/* Champion Tags */
+	GameplayTags.Champion_Regenerator_RegenDuration = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Champion.Regenerator.RegenDuration"),
+		FString("Regeneration Duration"));
+	GameplayTags.Champion_Regenerator_RegenAmount = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Champion.Regenerator.RegenAmount"),
+		FString("Regen Amount each period"));
 }

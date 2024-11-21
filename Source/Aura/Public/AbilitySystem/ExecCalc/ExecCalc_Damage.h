@@ -16,7 +16,7 @@ class AURA_API UExecCalc_Damage : public UGameplayEffectExecutionCalculation
 public:
 	UExecCalc_Damage();
 	static void HandleDebuff(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
-	                          const FGameplayEffectSpec& OwningSpec, FAggregatorEvaluateParameters EvaluateParameters);
+	                          const FGameplayEffectSpec& OwningSpec, const FAggregatorEvaluateParameters& EvaluateParameters);
 	virtual void Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const override;
 
 	static float CalculateRadialDamage(const FGameplayEffectContextHandle& EffectContextHandle,const float Damage, const AActor* TargetAvatar);
