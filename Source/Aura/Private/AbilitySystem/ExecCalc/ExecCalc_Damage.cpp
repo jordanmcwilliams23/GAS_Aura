@@ -210,11 +210,6 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 		Damage += Damage + SourceCriticalHitDamage / 100.f;
 		UAuraAbilitySystemLibrary::SetIsCriticalHit(EffectContextHandle, true);
 	}
-
-	if (TargetAvatar->Implements<UCombatInterface>())
-	{
-		ICombatInterface::Execute_ReceivedDamage(TargetAvatar, Damage);
-	}
 	const FGameplayModifierEvaluatedData EvaluatedData(UAuraAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, Damage);
 	OutExecutionOutput.AddOutputModifier(EvaluatedData);
 }

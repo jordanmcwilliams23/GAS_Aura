@@ -7,6 +7,7 @@
 #include "GameplayEffectTypes.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "AbilitySystem/Passive/PassiveNiagaraComponent.h"
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
@@ -17,14 +18,6 @@
 AAuraCharacterBase::AAuraCharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
-	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnDebuffComponent");
-	BurnDebuffComponent->SetupAttachment(GetRootComponent());
-	BurnDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Burn;
-	
-	StunDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("StunDebuffComponent");
-	StunDebuffComponent->SetupAttachment(GetRootComponent());
-	StunDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Stun;
 	
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>("Weapon");
 	Weapon->SetupAttachment(GetMesh(), FName("WeaponHandSocket"));
@@ -41,15 +34,6 @@ AAuraCharacterBase::AAuraCharacterBase()
 	EffectAttachComponent->SetupAttachment(GetRootComponent());
 	EffectAttachComponent->SetUsingAbsoluteRotation(true);
 	EffectAttachComponent->SetWorldRotation(FRotator::ZeroRotator);
-	
-	HaloOfProtectionNiagaraComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>("HaloOfProtectionNiagaraComponent");
-	HaloOfProtectionNiagaraComponent->SetupAttachment(EffectAttachComponent);
-	
-	LifeSiphonNiagaraComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>("LifeSiphonNiagaraComponent");
-	LifeSiphonNiagaraComponent->SetupAttachment(EffectAttachComponent);
-
-	ManaSiphonNiagaraComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>("ManaSiphonNiagaraComponent");
-	ManaSiphonNiagaraComponent->SetupAttachment(EffectAttachComponent);
 }
 
 void AAuraCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -73,6 +57,12 @@ void AAuraCharacterBase::OnRep_Stunned()
 		BlockedTags.AddTag(AuraTags.Player_Block_InputHeld);
 		BlockedTags.AddTag(AuraTags.Player_Block_InputPressed);
 		BlockedTags.AddTag(AuraTags.Player_Block_InputReleased);
+		UDebuffNiagaraComponent* StunDebuffComponent = NewObject<UDebuffNiagaraComponent>(this);
+		StunDebuffComponent->SetAsset(StunNiagaraSystemClass);
+		StunDebuffComponent->SetupAttachment(GetRootComponent());
+		StunDebuffComponent->RegisterComponent();
+		StunDebuffComponent->SetupComponent();
+		StunDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Stun;
 		if (bIsStunned)
 		{
 			AuraASC->AddLooseGameplayTags(BlockedTags);
@@ -87,12 +77,17 @@ void AAuraCharacterBase::OnRep_Stunned()
 
 void AAuraCharacterBase::OnRep_Burning()
 {
-	if (bIsBurning)
+	
+	if (bIsBurning && !GetAbilitySystemComponent()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Debuff_Burn))
 	{
+		UDebuffNiagaraComponent* BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnDebuffComponent");
+		BurnDebuffComponent->SetupAttachment(GetRootComponent());
+		BurnDebuffComponent->RegisterComponent();
+		BurnDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Burn;
 		BurnDebuffComponent->Activate();
 	} else
 	{
-		BurnDebuffComponent->Deactivate();
+		//BurnDebuffComponent->Deactivate();
 	}
 }
 
@@ -104,8 +99,22 @@ void AAuraCharacterBase::StunTagChanged(const FGameplayTag CallbackTag, int32 Ne
 
 void AAuraCharacterBase::BurnTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
+	const bool bPreviouslyBurning = bIsBurning;
 	bIsBurning = NewCount > 0;
-	if (bIsBurning) { BurnDebuffComponent->Activate(); } else { BurnDebuffComponent->Deactivate(); }
+	if (bIsBurning && !bPreviouslyBurning)
+	{
+		UDebuffNiagaraComponent* BurnDebuffComponent = NewObject<UDebuffNiagaraComponent>(this);
+		BurnDebuffComponent->SetupAttachment(GetRootComponent());
+		BurnDebuffComponent->SetAsset(BurnNiagaraSystemClass);
+		BurnDebuffComponent->RegisterComponent();
+		BurnDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Burn;
+		BurnDebuffComponent->SetupComponent();
+		BurnDebuffComponent->Activate();
+	}
+	else
+	{
+		//BurnDebuffComponent->Deactivate();
+	}
 }
 
 void AAuraCharacterBase::BeginPlay() { Super::BeginPlay(); }

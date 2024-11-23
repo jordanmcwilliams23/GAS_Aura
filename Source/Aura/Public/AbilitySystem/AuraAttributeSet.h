@@ -59,7 +59,6 @@ class AURA_API UAuraAttributeSet : public UAttributeSet
 public:
 	UAuraAttributeSet();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 	void RefillVitalAttributes();
@@ -226,10 +225,10 @@ public:
 private:
 	void HandleIncomingDamage(const FEffectProperties& Props);
 	void HandleIncomingXP(const FEffectProperties& Props);
-	void Debuff(const FEffectProperties& Props) const;
-	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
+	static void Debuff(const FEffectProperties& Props);
+	static void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props);
 	static void ShowFloatingText(const FEffectProperties& Props, float Damage, bool bIsBlockedHit=false, bool bIsCriticalHit=false);
-	void SendXPEvent(const FEffectProperties& FullEffectProperties) const;
+	void SendXPEvent(const FEffectProperties& EffectProperties) const;
 	bool bTopOffHealth = false;
 	bool bTopOffMana = false;
 };

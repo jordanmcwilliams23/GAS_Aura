@@ -23,10 +23,25 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category="Projectile")
 	AAuraProjectile* SpawnProjectile(const FGameplayTag& CombatSocketTag, const FVector& ProjectileTargetLocation);
+	
+	UFUNCTION(BlueprintCallable)
+	void SpawnProjectiles(const FVector& TargetLocation, const FGameplayTag& SocketTag, AActor* HomingTarget, const float PitchOverride = 0.f, const FVector OverrideSpawnLocation = FVector::ZeroVector);
 
 	UPROPERTY(EditDefaultsOnly)
 	bool bShouldZeroOutPitch = false;
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 NumProjectiles = 5;
+
+	UPROPERTY(EditDefaultsOnly, Category="Homing")
+	float HomingAccelerationMin = 1600.f;
+
+	UPROPERTY(EditDefaultsOnly, Category="Homing")
+	float HomingAccelerationMax = 3200.f;
+
+	UPROPERTY(EditDefaultsOnly, Category="Homing")
+	bool bHomingProjectiles = true;
+
+	UPROPERTY(EditDefaultsOnly, Category = "FireBolt")
+	float ProjectileSpread = 90.f;
 };

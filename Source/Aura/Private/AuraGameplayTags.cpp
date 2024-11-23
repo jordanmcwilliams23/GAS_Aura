@@ -146,6 +146,8 @@ void FAuraGameplayTags::InitializeNativeTags()
 		FString("Cooldown Data Tag"));
 	
 	/* Combat Socket Tags */
+	GameplayTags.CombatSocket = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket"),
+		FString("Generic tag for testing if using combat socket"));
 	GameplayTags.CombatSocket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Weapon"),
 		FString("Weapon"));
 	GameplayTags.CombatSocket_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.LeftHand"),
@@ -154,7 +156,7 @@ void FAuraGameplayTags::InitializeNativeTags()
 FString("Right Hand"));
 	GameplayTags.CombatSocket_Tail = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Tail"),
 FString("Tail"));
-
+	
 	GameplayTags.TagToSocketName.Add(GameplayTags.CombatSocket_Weapon, FName("WeaponSocket"));
 	GameplayTags.TagToSocketName.Add(GameplayTags.CombatSocket_LeftHand, FName("LeftHandSocket"));
 	GameplayTags.TagToSocketName.Add(GameplayTags.CombatSocket_RightHand, FName("RightHandSocket"));
@@ -185,8 +187,6 @@ FString("Tail"));
 	/* Gameplay Cue Tags */
 	GameplayTags.GameplayCue_FireBlast = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("GameplayCue.FireBlast"),
 		FString("GameplayCue Tag for FireBlast"));
-	GameplayTags.GameplayCue_FireBlast = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("GameplayCue.Regeneration"),
-		FString("GameplayCue Tag for Regenerator's Regeneration GC"));
 
 	/* Champion Tags */
 	GameplayTags.Champion_Regenerator_RegenDuration = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Champion.Regenerator.RegenDuration"),

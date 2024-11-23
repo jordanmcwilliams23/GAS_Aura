@@ -121,7 +121,7 @@ public:
 	/* End Data Tags */
 
 	/* Combat Socket Tags */
-	
+	FGameplayTag CombatSocket;
 	FGameplayTag CombatSocket_Weapon;
 	FGameplayTag CombatSocket_LeftHand;
 	FGameplayTag CombatSocket_RightHand;
@@ -154,7 +154,6 @@ public:
 
 	/* Gameplay Cue Tags */
 	FGameplayTag GameplayCue_FireBlast;
-	FGameplayTag GameplayCue_Regeneration;
 
 	/* Champion Tags */
 	FGameplayTag Champion_Regenerator_RegenDuration;

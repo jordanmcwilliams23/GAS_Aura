@@ -9,8 +9,8 @@
 #include "Components/WidgetComponent.h"
 #include "UI/Widget/AuraUserWidget.h"
 #include "AuraGameplayTags.h"
+#include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "AI/AuraAIController.h"
-#include "Aura/AuraLogChannels.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -153,29 +153,13 @@ void AAuraEnemy::InitAbilityActorInfo()
 {
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
+	const UCharacterClassInfo* CharacterClassInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(this);
+	const FChampionInfo ChampionInfo = CharacterClassInfo->ChampionInfo;
 	if (HasAuthority())
 	{
-		//TODO Check if champion and perform set up
-		if (RollIsChampion())
+		if (ChampionInfo.bChampionsEnabled && bCanBeChampion && (bForceSpawnAsChampion || RollIsChampion()))
 		{
-			const UCharacterClassInfo* CharacterClassInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(this);
-			const FChampionInfo ChampionInfo = CharacterClassInfo->ChampionInfo;
-			const float Multiplier = FMath::FRandRange(ChampionAttributeMultiplierRange.X, ChampionAttributeMultiplierRange.Y);
-			UAuraAbilitySystemLibrary::InitializeDefaultAttributesWithMultiplier(this, GetAbilitySystemComponent(), CharacterClass, Level, Multiplier);
-			EChampionType ChosenType = GetRandomChampionType();
-			switch (ChosenType)
-			{
-			case EChampionType::Regenerator:
-				OnDamageReceived.AddUObject(this, &AAuraEnemy::Regenerate);
-				break;
-			case EChampionType::Shooter:
-				break;
-			case EChampionType::Speedy:
-				break;
-			default:
-				break;
-					
-			}
+			SetupChampion(ChampionInfo);
 		} else
 		{
 			InitializeDefaultAttributes();
@@ -200,9 +184,26 @@ bool AAuraEnemy::RollIsChampion() const
 
 EChampionType AAuraEnemy::GetRandomChampionType()
 {
-	return EChampionType::Regenerator;
-	//uint8 RandomInt = FMath::RandRange(0, static_cast<uint8>(EChampionType::Speedy));
-	//return static_cast<EChampionType>(RandomInt);
+	//return EChampionType::Speedy;
+	uint8 RandomInt = FMath::RandRange(0, static_cast<uint8>(EChampionType::Splitter));
+	return static_cast<EChampionType>(RandomInt);
+}
+
+void AAuraEnemy::DebugTestRandomChampType()
+{
+	ChampionTypeFrequency.Empty();
+	ChampionTypeFrequency.Add(EChampionType::Regenerator, 0);
+	ChampionTypeFrequency.Add(EChampionType::Speedy, 0);
+	ChampionTypeFrequency.Add(EChampionType::Shooter, 0);
+	for (int i = 0; i < 100; ++i)
+	{
+		ChampionTypeFrequency[GetRandomChampionType()]++;
+	}
+	for (const TTuple<EChampionType, int32>& Pair : ChampionTypeFrequency)
+	{
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 4.f, FColor::Emerald, FString::Printf(TEXT("Champion Type: %d Frequency: %d"), Pair.Key, Pair.Value));
+	}
 }
 
 void AAuraEnemy::Regenerate(const float Damage)
@@ -211,7 +212,8 @@ void AAuraEnemy::Regenerate(const float Damage)
 	const FChampionInfo ChampionInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(this)->ChampionInfo;
 	const UAuraAttributeSet* AuraAttributes = Cast<UAuraAttributeSet>(GetAttributeSet());
 	const float HealthPercentage = 100.f * AuraAttributes->GetHealth() / AuraAttributes->GetMaxHealth();
-	UE_LOG(LogAura, Display, TEXT("Enemy health percent: %f"), HealthPercentage);
+	/* if (GEngine)
+		GEngine->AddOnScreenDebugMessage(39, 5.f, FColor::Green, FString::Printf(TEXT("Enemy Health Percent: %f"), HealthPercentage)); */
 	if (HealthPercentage <= ChampionInfo.Regenerator_HealthPercentThreshold)
 	{
 		const FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
@@ -224,6 +226,49 @@ void AAuraEnemy::Regenerate(const float Damage)
 		GetAbilitySystemComponent()->ApplyGameplayEffectSpecToSelf(*Spec.Data);
 		//Rework this if multiple delegates need to use OnDamageReceived
 		this->OnDamageReceived.RemoveAll(this);
+	}
+}
+
+void AAuraEnemy::ShooterAbility() const
+{
+	const FChampionInfo ChampionInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(this)->ChampionInfo;
+	FGameplayAbilitySpec Spec = FGameplayAbilitySpec(ChampionInfo.Shooter_FireProjectileClass);
+	GetAbilitySystemComponent()->GiveAbilityAndActivateOnce(Spec);
+}
+
+void AAuraEnemy::SetupChampion(const FChampionInfo& ChampionInfo)
+{
+	bIsChampion = true;
+	const float Multiplier = FMath::FRandRange(ChampionInfo.ChampionAttributeMultiplierRange.X, ChampionInfo.ChampionAttributeMultiplierRange.Y);
+	UAuraAbilitySystemLibrary::InitializeDefaultAttributesWithMultiplier(this, GetAbilitySystemComponent(), CharacterClass, Level, Multiplier);
+	const EChampionType ChosenType = bForceSpawnAsChampion ? ForceChampionType : GetRandomChampionType();
+	SetActorScale3D(ChampionInfo.ScaleMultiplier * GetActorScale3D());
+			
+	UDebuffNiagaraComponent* Particles = NewObject<UDebuffNiagaraComponent>(this);
+	Particles->SetupAttachment(GetRootComponent());
+	Particles->SetAsset(ChampionInfo.BaseNiagaraSystem);
+	//Doesn't really need a debuff tag, filler
+	Particles->DebuffTag = FAuraGameplayTags::Get().Champion_Regenerator_RegenAmount;
+	Particles->SetAutoDestroy(true);
+	Particles->SetupComponent();
+	Particles->bAutoActivate = true;
+	Particles->RegisterComponent();
+	switch (ChosenType)
+	{
+	case EChampionType::Regenerator:
+		OnDamageReceived.AddUObject(this, &AAuraEnemy::Regenerate);
+		break;
+	case EChampionType::Shooter:
+		ShooterAbility();
+		break;
+	case EChampionType::Speedy:
+		GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed * ChampionInfo.Speedy_SpeedMultiplier;
+		break;
+	case EChampionType::Splitter:
+		OnDeath.AddDynamic(this, &AAuraEnemy::Split);
+		break;
+	default:
+		break;
 	}
 }
 

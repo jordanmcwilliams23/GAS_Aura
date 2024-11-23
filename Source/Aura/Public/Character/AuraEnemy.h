@@ -23,7 +23,8 @@ enum class EChampionType : uint8
 {
 	Regenerator = 0,
 	Shooter = 1,
-	Speedy = 2
+	Speedy = 2,
+	Splitter = 3
 };
 
 
@@ -67,6 +68,12 @@ public:
 
 	void SetLevel(const int InLevel) { Level = InLevel; }
 
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Champion")
+	bool bForceSpawnAsChampion = false;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Champion")
+	EChampionType ForceChampionType = EChampionType::Regenerator;
+
 protected:
 	
 	virtual void BeginPlay() override;
@@ -98,14 +105,14 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void SpawnLoot();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Champion")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Champion", meta=(ExposeOnSpawn="true"))
 	bool bCanBeChampion = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Champion")
 	FScalableFloat ChanceToBeChampion;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Champion")
-	FVector2f ChampionAttributeMultiplierRange = FVector2f(1.2f, 2.f);
+	UPROPERTY(BlueprintReadOnly, Category="Champion")
+	bool bIsChampion = false;
 
 	UFUNCTION(BlueprintCallable, Category="Champion")
 	bool RollIsChampion() const;
@@ -113,7 +120,19 @@ protected:
 	UFUNCTION(BlueprintCallable, Category="Champion")
 	static EChampionType GetRandomChampionType();
 
+	UFUNCTION()
+	void DebugTestRandomChampType();
+	UPROPERTY()
+	TMap<EChampionType, int32> ChampionTypeFrequency;
+
 	void Regenerate(const float Damage);
+
+	void ShooterAbility() const;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void Split(AActor* DeadCharacter);
+
+	void SetupChampion(const FChampionInfo& ChampionInfo);
 private:
 	
 	UPROPERTY(EditDefaultsOnly)

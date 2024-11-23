@@ -5,7 +5,6 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
-#include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Aura/AuraTypes.h"
 #include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
@@ -142,13 +141,15 @@ protected:
 	/* Minions */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int32 MinionCount = 0;
-
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UDebuffNiagaraComponent> BurnDebuffComponent;
 	
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UDebuffNiagaraComponent> StunDebuffComponent;
+	TObjectPtr<USceneComponent> EffectAttachComponent;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UNiagaraSystem> BurnNiagaraSystemClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UNiagaraSystem> StunNiagaraSystemClass;
 private:
 	UPROPERTY(EditAnywhere, Category="Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
@@ -158,17 +159,4 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="Abilities")
 	TObjectPtr<UAnimMontage> HitReactMontage;
-
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UPassiveNiagaraComponent> HaloOfProtectionNiagaraComponent;
-	
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UPassiveNiagaraComponent> LifeSiphonNiagaraComponent;
-	
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UPassiveNiagaraComponent> ManaSiphonNiagaraComponent;
-
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USceneComponent> EffectAttachComponent;
-	
 };

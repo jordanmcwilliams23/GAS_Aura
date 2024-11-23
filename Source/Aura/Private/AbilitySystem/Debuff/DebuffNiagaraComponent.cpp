@@ -13,9 +13,16 @@ UDebuffNiagaraComponent::UDebuffNiagaraComponent()
 	const FAuraGameplayTags& Tags = FAuraGameplayTags::Get();
 }
 
-void UDebuffNiagaraComponent::BeginPlay()
+void UDebuffNiagaraComponent::OnOwnerDeath(AActor* Character) { Deactivate(); }
+
+void UDebuffNiagaraComponent::Deactivate()
 {
-	Super::BeginPlay();
+	Super::Deactivate();
+	DestroyComponent();
+}
+
+void UDebuffNiagaraComponent::SetupComponent()
+{
 	if (!GetOwner()->HasAuthority()) return;
 	ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetOwner());
 	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner());
@@ -24,6 +31,7 @@ void UDebuffNiagaraComponent::BeginPlay()
 		ASC->RegisterGameplayTagEvent(DebuffTag, EGameplayTagEventType::NewOrRemoved).AddLambda(
 		[this](const FGameplayTag CallbackTag, const int32 NewCount)
 		{
+			if (!IsValid(this)) return;
 			if (NewCount > 0) { Activate(); } else { Deactivate(); }
 		});
 	} else if (CombatInterface)
@@ -33,6 +41,7 @@ void UDebuffNiagaraComponent::BeginPlay()
 			InASC->RegisterGameplayTagEvent(DebuffTag, EGameplayTagEventType::NewOrRemoved).AddLambda(
 		[this](const FGameplayTag CallbackTag, const int32 NewCount)
 			{
+				if (!IsValid(this)) return;
 				if (NewCount > 0) { Activate(); } else { Deactivate(); }
 			});
 		});
@@ -42,5 +51,3 @@ void UDebuffNiagaraComponent::BeginPlay()
 		CombatInterface->GetOnDeathDelegate().AddDynamic(this, &UDebuffNiagaraComponent::OnOwnerDeath);
 	}
 }
-
-void UDebuffNiagaraComponent::OnOwnerDeath(AActor* Character) { Deactivate(); }

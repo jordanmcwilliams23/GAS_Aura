@@ -18,11 +18,13 @@ class AURA_API UDebuffNiagaraComponent : public UNiagaraComponent
 public:
 	UDebuffNiagaraComponent();
 	
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	FGameplayTag DebuffTag;
-protected:
-	virtual void BeginPlay() override;
 
+	virtual void Deactivate() override;
+
+	void SetupComponent();
+protected:
 	UFUNCTION()
 	void OnOwnerDeath(AActor* Character);
 };
