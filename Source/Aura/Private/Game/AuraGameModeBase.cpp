@@ -106,9 +106,15 @@ void AAuraGameModeBase::TravelToMap(const UMVVM_LoadSlot* LoadSlot)
 	UGameplayStatics::OpenLevelBySoftObjectPtr(LoadSlot, Levels.FindChecked(LoadSlot->GetMapName()));
 }
 
+void AAuraGameModeBase::TravelToMapStreaming(const FName& MapName) const
+{
+	FLatentActionInfo LatentInfo;
+	UGameplayStatics::LoadStreamLevel(this, MapName, true, true, LatentInfo);
+}
+
 AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 {
-	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
+	const UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
 	TArray<AActor*> OutActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), OutActors);
 	if (OutActors.IsEmpty()) return nullptr;
@@ -129,7 +135,7 @@ AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 
 ULoadScreenSaveGame* AAuraGameModeBase::RetrieveInGameSaveData() const
 {
-	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
+	const UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
 	const FString InGameLoadSlotName = AuraGameInstance->LoadSlotName;
 	const int32 InGameLoadSlotIndex = AuraGameInstance->LoadSlotIndex;
 	return GetSaveSlotData(InGameLoadSlotName, InGameLoadSlotIndex);
@@ -138,9 +144,11 @@ ULoadScreenSaveGame* AAuraGameModeBase::RetrieveInGameSaveData() const
 void AAuraGameModeBase::SaveInGameProgressData(ULoadScreenSaveGame* SaveObject) const
 {
 	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
+	
 	const FString InGameLoadSlotName = AuraGameInstance->LoadSlotName;
 	const int32 InGameLoadSlotIndex = AuraGameInstance->LoadSlotIndex;
 	AuraGameInstance->PlayerStartTag = SaveObject->PlayerStartTag;
+	
 	
 	UGameplayStatics::SaveGameToSlot(SaveObject, InGameLoadSlotName, InGameLoadSlotIndex);
 }

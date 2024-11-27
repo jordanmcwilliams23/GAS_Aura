@@ -45,17 +45,23 @@ struct FChampionInfo
 
 	//General
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Champion")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Champion")
 	bool bChampionsEnabled = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Champion")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Champion")
 	FVector2f ChampionAttributeMultiplierRange = FVector2f(1.2f, 2.f);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Champion")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Champion")
 	float ScaleMultiplier = 1.2f;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Champion")
 	TObjectPtr<UNiagaraSystem> BaseNiagaraSystem;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Champion")
+	int32 ExtraNumLootItems = 1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Champion")
+	float ExtraSpawnLootChance = 5.f;
 
 	//Regenerator
 	
@@ -91,6 +97,9 @@ struct FChampionInfo
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Champion")
 	float Splitter_SpawnDistance = 50.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Champion")
+	float Splitter_CloneScaleMultiplier = 0.75f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Champion")
 	TObjectPtr<UNiagaraSystem> GroundSummonNiagaraSystem;

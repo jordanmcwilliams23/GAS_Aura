@@ -17,6 +17,7 @@ class AURA_API AAuraEnemySpawnPoint : public ATargetPoint
 {
 	GENERATED_BODY()
 public:
+	AAuraEnemySpawnPoint();
 
 	UFUNCTION(BlueprintCallable)
 	void SpawnEnemy() const;
@@ -27,6 +28,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Enemy Class")
 	int32 EnemyLevel = 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Enemy Class")
-	ECharacterClass CharacterClass = ECharacterClass::Warrior;
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Enemy Class")
+	//ECharacterClass CharacterClass = ECharacterClass::Warrior;
+
+	void SetSelected(const bool bSelected) const;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Enemy Class")
+	TObjectPtr<UTexture2D> UnselectedTexture;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Enemy Class")
+	TObjectPtr<UTexture2D> SelectedTexture;
 };

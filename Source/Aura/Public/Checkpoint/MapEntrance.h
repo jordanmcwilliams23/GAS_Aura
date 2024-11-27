@@ -3,19 +3,25 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Checkpoint/Checkpoint.h"
+#include "Aura/Aura.h"
+#include "Interaction/HighlightInterface.h"
 #include "MapEntrance.generated.h"
 
+class USphereComponent;
 /**
  * 
  */
 UCLASS()
-class AURA_API AMapEntrance : public ACheckpoint
+class AURA_API AMapEntrance : public AActor, public IHighlightInterface
 {
 	GENERATED_BODY()
 public:
-	AMapEntrance(const FObjectInitializer& ObjectInitializer);
-	
+	AMapEntrance();
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> MoveToComponent;
+
+	//Highlight Interface
 	virtual void HighlightActor_Implementation() override;
 
 	UPROPERTY(EditAnywhere)
@@ -24,8 +30,19 @@ public:
 	UPROPERTY(EditAnywhere)
 	FName DestinationPlayerStartTag;
 protected:
+	virtual void BeginPlay() override;
+
+	UFUNCTION()
 	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-	                             const FHitResult& HitResult) override;
-	virtual void LoadActor_Implementation() override;
+	                             const FHitResult& HitResult);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UStaticMeshComponent> Mesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<USphereComponent> Sphere;
+	
+	UPROPERTY(EditDefaultsOnly)
+	int32 CustomDepthRenderValue = CUSTOM_DEPTH_TAN;
 };

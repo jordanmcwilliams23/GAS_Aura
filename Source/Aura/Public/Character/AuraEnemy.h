@@ -74,6 +74,9 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Champion")
 	EChampionType ForceChampionType = EChampionType::Regenerator;
 
+	UPROPERTY(BlueprintReadOnly, Category="Champion")
+	bool bIsChampion = false;
+
 protected:
 	
 	virtual void BeginPlay() override;
@@ -110,9 +113,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Champion")
 	FScalableFloat ChanceToBeChampion;
-
-	UPROPERTY(BlueprintReadOnly, Category="Champion")
-	bool bIsChampion = false;
 
 	UFUNCTION(BlueprintCallable, Category="Champion")
 	bool RollIsChampion() const;

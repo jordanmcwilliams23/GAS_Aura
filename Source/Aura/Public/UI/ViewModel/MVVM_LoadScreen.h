@@ -8,6 +8,15 @@
 
 class UMVVM_LoadSlot;
 
+UENUM(BlueprintType)
+enum ENewSlotResponse
+{
+	Success,
+	EmptyName,
+	InvalidName,
+	Multiplayer
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSlotSelected);
 
 /**
@@ -28,7 +37,7 @@ public:
 	UMVVM_LoadSlot* GetLoadSlotViewModelByIndex(int32 Index) const;
 
 	UFUNCTION(BlueprintCallable)
-	void NewSlotButtonPressed(const int32 Slot, const FString& EnteredName);
+	ENewSlotResponse NewSlotButtonPressed(const int32 Slot, const FString& EnteredName);
 
 	UFUNCTION(BlueprintCallable)
 	void NewGameButtonPressed(const int32 Slot);
@@ -36,6 +45,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SelectSlotButtonPressed(const int32 Slot);
 
+	UFUNCTION(BlueprintCallable)
 	void LoadData();
 
 	UPROPERTY(BlueprintAssignable)

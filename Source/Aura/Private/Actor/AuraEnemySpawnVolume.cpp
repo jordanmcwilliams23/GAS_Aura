@@ -3,10 +3,12 @@
 
 #include "Actor/AuraEnemySpawnVolume.h"
 
+#include "LevelEditor.h"
 #include "Actor/AuraEnemySpawnPoint.h"
 #include "Aura/AuraLogChannels.h"
 #include "Components/BoxComponent.h"
 #include "Interaction/PlayerInterface.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AAuraEnemySpawnVolume::AAuraEnemySpawnVolume()
@@ -18,6 +20,12 @@ AAuraEnemySpawnVolume::AAuraEnemySpawnVolume()
 	Box->SetCollisionObjectType(ECC_WorldStatic);
 	Box->SetCollisionResponseToAllChannels(ECR_Ignore);
 	Box->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	Box->SetLineThickness(5.f);
+
+#if WITH_EDITOR
+	FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	LevelEditorModule.OnActorSelectionChanged().AddUObject(this, &AAuraEnemySpawnVolume::HandleOnActorSelectedChanged);
+#endif
 }
 
 void AAuraEnemySpawnVolume::LoadActor_Implementation()
@@ -42,12 +50,47 @@ void AAuraEnemySpawnVolume::OnBoxOverlap(UPrimitiveComponent* OverlappedComponen
 	if (SpawnPoints.IsEmpty())
 	{
 		UE_LOG(LogAura, Error, TEXT("%s does not have any spawn points set!"), *GetNameSafe(this));
+		return;
 	}
+
+	if (SpawnSound)
+	{
+		UGameplayStatics::PlaySound2D(this, SpawnSound);
+	}
+	
 	for (const AAuraEnemySpawnPoint* Point: SpawnPoints)
 	{
 		if (IsValid(Point))
 			Point->SpawnEnemy();
 	}
 	Box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AAuraEnemySpawnVolume::HandleOnActorSelectedChanged(const TArray<UObject*>& NewSelection, bool bForceRefresh)
+{
+	if (NewSelection.Contains(this))
+	{
+		if (!bSelected)
+		{
+			bSelected = true;
+			for (const AAuraEnemySpawnPoint* SpawnPoint: SpawnPoints)
+			{
+				if (SpawnPoint)
+					SpawnPoint->SetSelected(true);
+			}
+		}
+	}
+	else
+	{
+		if (bSelected)
+		{
+			bSelected = false;
+			for (const AAuraEnemySpawnPoint* SpawnPoint: SpawnPoints)
+			{
+				if (SpawnPoint)
+					SpawnPoint->SetSelected(false);
+			}
+		}
+	}
 }
 

@@ -18,7 +18,7 @@ class AURA_API ACheckpoint : public APlayerStart, public ISaveInterface, public 
 {
 	GENERATED_BODY()
 public:
-	ACheckpoint(const FObjectInitializer& ObjectInitializer);
+	explicit ACheckpoint(const FObjectInitializer& ObjectInitializer);
 
 	UPROPERTY(BlueprintReadWrite, SaveGame)
 	bool bReached = false;

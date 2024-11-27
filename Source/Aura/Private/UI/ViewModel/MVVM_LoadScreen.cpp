@@ -13,13 +13,14 @@ UMVVM_LoadSlot* UMVVM_LoadScreen::GetLoadSlotViewModelByIndex(const int32 Index)
 	return LoadSlots.FindChecked(Index);
 }
 
-void UMVVM_LoadScreen::NewSlotButtonPressed(const int32 Slot, const FString& EnteredName)
+ENewSlotResponse UMVVM_LoadScreen::NewSlotButtonPressed(const int32 Slot, const FString& EnteredName)
 {
 	const AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
+	if (EnteredName.IsEmpty()) return EmptyName;
 	if (!IsValid(AuraGameMode))
 	{
 		GEngine->AddOnScreenDebugMessage(5, 15.f, FColor::Magenta, FString("Error: switch to single player"));
-		return;
+		return Multiplayer;
 	}
 
 	UMVVM_LoadSlot* LoadSlot = LoadSlots[Slot];
@@ -35,7 +36,8 @@ void UMVVM_LoadScreen::NewSlotButtonPressed(const int32 Slot, const FString& Ent
 	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(AuraGameMode->GetGameInstance());
 	AuraGameInstance->LoadSlotName = LoadSlot->GetLoadSlotName();
 	AuraGameInstance->LoadSlotIndex = LoadSlot->SlotIndex;
-	AuraGameInstance->PlayerStartTag = AuraGameMode->DefaultPlayerStartTag;
+	AuraGameInstance->PlayerStartTag = LoadSlot->PlayerStartTag = AuraGameMode->DefaultPlayerStartTag;
+	return Success;
 }
 
 void UMVVM_LoadScreen::NewGameButtonPressed(const int32 Slot)
@@ -59,10 +61,10 @@ void UMVVM_LoadScreen::LoadData()
 	if (!IsValid(AuraGameMode)) return;
 	for (const TTuple<int32, UMVVM_LoadSlot*> LoadSlot : LoadSlots)
 	{
-		ULoadScreenSaveGame* SaveObject = AuraGameMode->GetSaveSlotData(LoadSlot.Value->GetLoadSlotName(), LoadSlot.Key);
+		const ULoadScreenSaveGame* SaveObject = AuraGameMode->GetSaveSlotData(LoadSlot.Value->GetLoadSlotName(), LoadSlot.Key);
 
 		const FString PlayerName = SaveObject->PlayerName;
-		TEnumAsByte<ESaveSlotStatus> SaveSlotStatus = SaveObject->SaveSlotStatus;
+		const TEnumAsByte<ESaveSlotStatus> SaveSlotStatus = SaveObject->SaveSlotStatus;
 
 		LoadSlot.Value->SlotStatus = SaveSlotStatus;
 		LoadSlot.Value->SetPlayerName(PlayerName);
@@ -71,7 +73,7 @@ void UMVVM_LoadScreen::LoadData()
 		
 		LoadSlot.Value->SetMapName(SaveObject->MapName);
 		LoadSlot.Value->PlayerStartTag = SaveObject->PlayerStartTag;
-		//LoadSlot.Value->SetPlayerLevel(SaveObject->PlayerLevel);
+		LoadSlot.Value->SetPlayerLevel(SaveObject->PlayerLevel);
 	}
 }
 
@@ -95,7 +97,7 @@ void UMVVM_LoadScreen::PlayButtonPressed()
 		AuraGameModeBase->TravelToMap(SelectedSlot);
 }
 
-void UMVVM_LoadScreen::SetNumLoadSlots(int32 InNumLoadSlots)
+void UMVVM_LoadScreen::SetNumLoadSlots(const int32 InNumLoadSlots)
 {
 	UE_MVVM_SET_PROPERTY_VALUE(NumLoadSlots, InNumLoadSlots);
 }

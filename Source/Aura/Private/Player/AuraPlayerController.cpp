@@ -114,7 +114,7 @@ void AAuraPlayerController::CursorTrace()
 		CurrentActor = nullptr;
 		return;
 	}
-	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
+	GetHitResultUnderCursor(ECC_Target, false, CursorHit);
 	if (!CursorHit.bBlockingHit) return;
 	
 	LastActor = CurrentActor;
@@ -221,7 +221,8 @@ void AAuraPlayerController::AbilityInputTagHeld(const FInputActionValue& Value, 
 
 UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()
 {
-	if (AuraAbilitySystemComponent == nullptr) AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
+	if (AuraAbilitySystemComponent == nullptr)
+		AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
 	return AuraAbilitySystemComponent;
 }
 

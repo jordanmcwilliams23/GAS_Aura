@@ -32,8 +32,14 @@ protected:
 
 	UPROPERTY(EditInstanceOnly)
 	TArray<AAuraEnemySpawnPoint*> SpawnPoints;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<USoundBase> SpawnSound;
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UBoxComponent> Box;
 
+	bool bSelected = false;
+	
+	void HandleOnActorSelectedChanged(const TArray<UObject*>& NewSelection, bool bForceRefresh);
 };

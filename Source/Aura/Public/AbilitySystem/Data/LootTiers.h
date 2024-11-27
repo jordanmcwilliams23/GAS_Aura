@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "LootTiers.generated.h"
+class AAuraEnemy;
 class AAuraEffectActor;
 
 USTRUCT(BlueprintType)
@@ -34,7 +35,7 @@ class AURA_API ULootTiers : public UDataAsset
 public:
 
 	UFUNCTION(BlueprintCallable)
-	TArray<FLootItem> GetLootItems() const;
+	TArray<FLootItem> GetLootItems(const AAuraEnemy* Enemy = nullptr) const;
 	
 	UPROPERTY(EditDefaultsOnly, Category= "LootTiers|Spawning")
 	TArray<FLootItem> LootItems;

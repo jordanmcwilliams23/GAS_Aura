@@ -5,6 +5,13 @@
 
 #include "Aura/AuraLogChannels.h"
 #include "Character/AuraEnemy.h"
+#include "Components/BillboardComponent.h"
+
+AAuraEnemySpawnPoint::AAuraEnemySpawnPoint()
+{
+	if (UnselectedTexture)
+		GetSpriteComponent()->SetSprite(UnselectedTexture);
+}
 
 void AAuraEnemySpawnPoint::SpawnEnemy() const
 {
@@ -18,7 +25,13 @@ void AAuraEnemySpawnPoint::SpawnEnemy() const
 	}
 	AAuraEnemy* Enemy = GetWorld()->SpawnActorDeferred<AAuraEnemy>(EnemyClass, GetActorTransform());
 	Enemy->SetLevel(EnemyLevel);
-	Enemy->SetCharacterClass(CharacterClass);
+	//Enemy->SetCharacterClass(CharacterClass);
 	Enemy->FinishSpawning(GetActorTransform());
 	Enemy->SpawnDefaultController();
+}
+
+void AAuraEnemySpawnPoint::SetSelected(const bool bSelected) const
+{
+	if (IsValid(GetSpriteComponent()))
+		GetSpriteComponent()->SetSprite(bSelected ? SelectedTexture : UnselectedTexture);
 }

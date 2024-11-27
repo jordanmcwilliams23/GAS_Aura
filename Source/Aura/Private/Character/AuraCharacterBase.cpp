@@ -57,20 +57,24 @@ void AAuraCharacterBase::OnRep_Stunned()
 		BlockedTags.AddTag(AuraTags.Player_Block_InputHeld);
 		BlockedTags.AddTag(AuraTags.Player_Block_InputPressed);
 		BlockedTags.AddTag(AuraTags.Player_Block_InputReleased);
-		UDebuffNiagaraComponent* StunDebuffComponent = NewObject<UDebuffNiagaraComponent>(this);
-		StunDebuffComponent->SetAsset(StunNiagaraSystemClass);
-		StunDebuffComponent->SetupAttachment(GetRootComponent());
-		StunDebuffComponent->RegisterComponent();
-		StunDebuffComponent->SetupComponent();
-		StunDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Stun;
+
 		if (bIsStunned)
 		{
-			AuraASC->AddLooseGameplayTags(BlockedTags);
-			StunDebuffComponent->Activate();
+			if (!GetAbilitySystemComponent()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Debuff_Stun))
+			{
+				UDebuffNiagaraComponent* StunDebuffComponent = NewObject<UDebuffNiagaraComponent>(this);
+				StunDebuffComponent->SetAsset(StunNiagaraSystemClass);
+				StunDebuffComponent->SetupAttachment(GetRootComponent());
+				StunDebuffComponent->RegisterComponent();
+				StunDebuffComponent->SetupComponent();
+				StunDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Stun;
+				AuraASC->AddLooseGameplayTags(BlockedTags);
+				StunDebuffComponent->Activate();
+			}
 		} else
 		{
 			AuraASC->RemoveLooseGameplayTags(BlockedTags);
-			StunDebuffComponent->Deactivate();
+			//StunDebuffComponent->Deactivate();
 		}
 	}
 }
