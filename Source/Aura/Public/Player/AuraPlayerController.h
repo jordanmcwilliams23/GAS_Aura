@@ -19,6 +19,8 @@ class UInputAction;
 class UAuraAbilitySystemComponent;
 class USplineComponent;
 
+DECLARE_MULTICAST_DELEGATE(FOnReachedDestination);
+
 enum class ETargetingStatus : uint8
 {
 	TargetingEnemy,
@@ -52,6 +54,12 @@ class AURA_API AAuraPlayerController : public APlayerController, public IPlayerC
 {
 	GENERATED_BODY()
 public:
+
+	/* Player Controller Interface */
+	virtual void MenuOpened() override;
+	virtual void MenuClosed() override;
+	/* End Player Controller Interface */
+	
 	AAuraPlayerController();
 	virtual void PlayerTick(float DeltaTime) override;
 	
@@ -63,15 +71,17 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SyncOccludedActors();
-
-	/* Player Controller Interface */
-	virtual void MenuOpened() override;
-	virtual void MenuClosed() override;
-	/* End Player Controller Interface */
-
+	
 	UFUNCTION(BlueprintCallable)
 	void ShowTargetingActor(TSubclassOf<ATargetingActor> TargetingActorClass, const bool bInShow, UMaterialInterface* Material, float Radius = 0.f);
 
+	UFUNCTION(BlueprintCallable)
+	void BlockInputAndMoveToCachedDestination();
+
+	FOnReachedDestination OnReachedDestination;
+	
+	FVector CachedDestination = FVector::ZeroVector;
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -118,8 +128,7 @@ private:
 
 	void ShiftReleased() {bShiftKeyDown = false;}
 	bool bShiftKeyDown = false;
-
-	FVector CachedDestination = FVector::ZeroVector;
+	
 	float FollowTime = 0.f;
 	float ShortPressThreshold = 0.5f;
 	bool bAutoRunning = false;
@@ -139,8 +148,9 @@ private:
 
 	void Move(const struct FInputActionValue& InputActionValue);
 	void CursorTrace();
-	TObjectPtr<AActor> LastActor;
-	TObjectPtr<AActor> CurrentActor;
+	
+	TWeakObjectPtr<AActor> LastActor;
+	TWeakObjectPtr<AActor> CurrentActor;
 
 	static void HighlightActor(AActor* InActor);
 	static void UnhighlightActor(AActor* InActor);
@@ -179,4 +189,8 @@ private:
 	}
 
 	void UpdateMagicCircleLocation() const;
+
+	void EnableControls();
+
+	FDelegateHandle EnableControlsDelegateHandle;
 };

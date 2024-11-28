@@ -18,7 +18,7 @@ class AURA_API AMapEntrance : public AActor, public IHighlightInterface
 public:
 	AMapEntrance();
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<USceneComponent> MoveToComponent;
 
 	//Highlight Interface

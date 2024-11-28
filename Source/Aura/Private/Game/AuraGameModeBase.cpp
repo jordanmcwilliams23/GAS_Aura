@@ -14,6 +14,7 @@
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "UI/ViewModel/MVVM_LoadSlot.h"
 #include "GameFramework/Character.h"
+#include "Interaction/MapEntranceInterface.h"
 
 void AAuraGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
@@ -108,7 +109,7 @@ void AAuraGameModeBase::TravelToMap(const UMVVM_LoadSlot* LoadSlot)
 
 void AAuraGameModeBase::TravelToMapStreaming(const FName& MapName) const
 {
-	FLatentActionInfo LatentInfo;
+	const FLatentActionInfo LatentInfo;
 	UGameplayStatics::LoadStreamLevel(this, MapName, true, true, LatentInfo);
 }
 
@@ -121,13 +122,18 @@ AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 	AActor* SelectedActor = OutActors[0];
 	for (AActor* Actor : OutActors)
 	{
-		if (APlayerStart* PlayerStart = Cast<APlayerStart>(Actor))
+		APlayerStart* PlayerStart = Cast<APlayerStart>(Actor);
+		if (PlayerStart == nullptr) continue;
+		
+		if (PlayerStart->PlayerStartTag == AuraGameInstance->PlayerStartTag)
 		{
-			if (PlayerStart->PlayerStartTag == AuraGameInstance->PlayerStartTag)
+			if (PlayerStart->Implements<UMapEntranceInterface>())
 			{
-				SelectedActor = PlayerStart;
-				break;
+				PlayerControllers[0]->CachedDestination = IMapEntranceInterface::Execute_GetMoveToLocation(PlayerStart);
+				PlayerControllers[0]->BlockInputAndMoveToCachedDestination();
 			}
+			SelectedActor = PlayerStart;
+			break;
 		}
 	}
 	return SelectedActor;

@@ -24,6 +24,14 @@
 #include "Interaction/TargetInterface.h"
 #include "Kismet/KismetSystemLibrary.h"
 
+void AAuraPlayerController::MenuOpened()
+{
+}
+
+void AAuraPlayerController::MenuClosed()
+{
+}
+
 AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
@@ -108,8 +116,8 @@ void AAuraPlayerController::CursorTrace()
 {
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_CursorTrace))
 	{
-		UnhighlightActor(LastActor);
-		UnhighlightActor(CurrentActor);
+		UnhighlightActor(LastActor.Get());
+		UnhighlightActor(CurrentActor.Get());
 		LastActor = nullptr;
 		CurrentActor = nullptr;
 		return;
@@ -127,8 +135,8 @@ void AAuraPlayerController::CursorTrace()
 	}
 	if (LastActor != CurrentActor)
 	{
-		UnhighlightActor(LastActor);
-		HighlightActor(CurrentActor);
+		UnhighlightActor(LastActor.Get());
+		HighlightActor(CurrentActor.Get());
 	}
 }
 
@@ -147,7 +155,7 @@ void AAuraPlayerController::UnhighlightActor(AActor* InActor)
 void AAuraPlayerController::AbilityInputTagPressed(const FInputActionInstance& Instance, const FGameplayTag InputTag)
 {
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPressed)) return;
-	if (IsValid(CurrentActor))
+	if (IsValid(CurrentActor.Get()))
 	{
 		TargetingStatus = CurrentActor->Implements<UTargetInterface>() ? ETargetingStatus::TargetingEnemy : ETargetingStatus::TargetingNonenemy;
 	} else
@@ -174,9 +182,9 @@ void AAuraPlayerController::AbilityInputTagReleased(const FGameplayTag InputTag)
 	
 	if (const APawn* ControlledPawn = GetPawn(); FollowTime <= ShortPressThreshold && ControlledPawn)
 	{
-		if (IsValid(CurrentActor) && CurrentActor->Implements<UHighlightInterface>())
+		if (IsValid(CurrentActor.Get()) && CurrentActor->Implements<UHighlightInterface>())
 		{
-			IHighlightInterface::Execute_SetMoveToLocation(CurrentActor, CachedDestination);
+			IHighlightInterface::Execute_SetMoveToLocation(CurrentActor.Get(), CachedDestination);
 		}
 		else if (GetASC() && !GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPressed))
 		{
@@ -234,7 +242,35 @@ void AAuraPlayerController::AutoRun()
 		const FVector Direction = Spline->FindDirectionClosestToWorldLocation(LocationOnSpline, ESplineCoordinateSpace::World);
 		ControlledPawn->AddMovementInput(Direction);
 
-		if (const float DistanceToDestination = (LocationOnSpline - CachedDestination).Length(); DistanceToDestination <= AutoRunAcceptanceRadius) bAutoRunning = false;
+		if (const float DistanceToDestination = (LocationOnSpline - CachedDestination).Length(); DistanceToDestination <= AutoRunAcceptanceRadius)
+		{
+			bAutoRunning = false;
+			OnReachedDestination.Broadcast();
+		}
+	}
+}
+
+void AAuraPlayerController::BlockInputAndMoveToCachedDestination()
+{
+	const APawn* ControlledPawn = GetPawn();
+	const FAuraGameplayTags& AuraTags = FAuraGameplayTags::Get();
+	const FGameplayTagContainer BlockedTags = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>({
+				AuraTags.Player_Block_CursorTrace,
+				AuraTags.Player_Block_InputHeld,
+				AuraTags.Player_Block_InputPressed,
+				AuraTags.Player_Block_InputReleased}));
+	if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(this, ControlledPawn->GetActorLocation(), CachedDestination))
+	{
+		Spline->ClearSplinePoints();
+		for (const FVector& Point: NavPath->PathPoints) Spline->AddSplinePoint(Point, ESplineCoordinateSpace::World);
+			
+		if (NavPath->PathPoints.Num() > 0)
+		{
+			GetASC()->AddLooseGameplayTags(BlockedTags);
+			EnableControlsDelegateHandle = OnReachedDestination.AddUObject(this, &AAuraPlayerController::EnableControls);
+			CachedDestination = NavPath->PathPoints.Last();
+			bAutoRunning = true;
+		}
 	}
 }
 
@@ -301,19 +337,7 @@ void AAuraPlayerController::SyncOccludedActors()
 	  }
 	}
 
-void AAuraPlayerController::MenuOpened()
-{
-	if (++NumMenusOpen == 1)
-		SetInputMode(FInputModeUIOnly());
-}
-
-void AAuraPlayerController::MenuClosed()
-{
-	if (--NumMenusOpen == 0)
-		SetInputMode(GameAndUIInputMode);
-}
-
-void AAuraPlayerController::ShowTargetingActor(TSubclassOf<ATargetingActor> TargetingActorClass, const bool bInShow, UMaterialInterface* Material, float Radius)
+void AAuraPlayerController::ShowTargetingActor(const TSubclassOf<ATargetingActor> TargetingActorClass, const bool bInShow, UMaterialInterface* Material, const float Radius)
 {
 	if (bInShow && !IsValid(TargetingActor))
 	{
@@ -387,6 +411,18 @@ void AAuraPlayerController::UpdateMagicCircleLocation() const
 			TargetingActor->SetActorRotation(HitResult.Normal.Rotation());
 		}
 	}
+}
+
+void AAuraPlayerController::EnableControls()
+{
+	const FAuraGameplayTags& AuraTags = FAuraGameplayTags::Get();
+	const FGameplayTagContainer BlockedTags = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>({
+				AuraTags.Player_Block_CursorTrace,
+				AuraTags.Player_Block_InputHeld,
+				AuraTags.Player_Block_InputPressed,
+				AuraTags.Player_Block_InputReleased}));
+	GetASC()->RemoveLooseGameplayTags(BlockedTags);
+	OnReachedDestination.Remove(EnableControlsDelegateHandle);
 }
 
 void AAuraPlayerController::ShowOccludedActor(FCameraOccludedActor& OccludedActor)
