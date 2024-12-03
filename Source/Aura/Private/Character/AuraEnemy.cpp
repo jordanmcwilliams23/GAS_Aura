@@ -36,6 +36,7 @@ AAuraEnemy::AAuraEnemy()
 	Weapon->MarkRenderStateDirty();
 }
 
+/* Highlight Interface */
 void AAuraEnemy::HighlightActor_Implementation()
 {
 	GetMesh()->SetRenderCustomDepth(true);
@@ -52,7 +53,10 @@ bool AAuraEnemy::SetMoveToLocation_Implementation(FVector& OutDestination)
 {
 	return false;
 }
+/* End Highlight Interface */
 
+
+/* Target Interface */
 void AAuraEnemy::SetCombatTarget_Implementation(AActor* NewCombatTarget)
 {
 	CombatTarget = NewCombatTarget;
@@ -62,7 +66,9 @@ AActor* AAuraEnemy::GetCombatTarget_Implementation() const
 {
 	return CombatTarget;
 }
+/* End Target Interface */
 
+/* Combat Interface */
 int32 AAuraEnemy::GetCharacterLevel_Implementation()
 {
 	return Level;
@@ -81,6 +87,7 @@ void AAuraEnemy::ReceivedDamage_Implementation(const float Damage)
 	if (OnDamageReceived.IsBound())
 		OnDamageReceived.Broadcast(Damage);
 }
+/* End Combat Interface */
 
 void AAuraEnemy::PossessedBy(AController* NewController)
 {
@@ -154,7 +161,7 @@ void AAuraEnemy::InitAbilityActorInfo()
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 	const UCharacterClassInfo* CharacterClassInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(this);
-	const FChampionInfo ChampionInfo = CharacterClassInfo->ChampionInfo;
+	const FChampionInformation ChampionInfo = CharacterClassInfo->ChampionInfo;
 	if (HasAuthority())
 	{
 		if (ChampionInfo.bChampionsEnabled && bCanBeChampion && (bForceSpawnAsChampion || RollIsChampion()))
@@ -209,7 +216,7 @@ void AAuraEnemy::DebugTestRandomChampType()
 void AAuraEnemy::Regenerate(const float Damage)
 {
 	if (!HasAuthority()) return;
-	const FChampionInfo ChampionInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(this)->ChampionInfo;
+	const FChampionInformation ChampionInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(this)->ChampionInfo;
 	const UAuraAttributeSet* AuraAttributes = Cast<UAuraAttributeSet>(GetAttributeSet());
 	const float HealthPercentage = 100.f * AuraAttributes->GetHealth() / AuraAttributes->GetMaxHealth();
 	/* if (GEngine)
@@ -231,12 +238,12 @@ void AAuraEnemy::Regenerate(const float Damage)
 
 void AAuraEnemy::ShooterAbility() const
 {
-	const FChampionInfo ChampionInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(this)->ChampionInfo;
+	const FChampionInformation ChampionInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(this)->ChampionInfo;
 	FGameplayAbilitySpec Spec = FGameplayAbilitySpec(ChampionInfo.Shooter_FireProjectileClass);
 	GetAbilitySystemComponent()->GiveAbilityAndActivateOnce(Spec);
 }
 
-void AAuraEnemy::SetupChampion(const FChampionInfo& ChampionInfo)
+void AAuraEnemy::SetupChampion(const FChampionInformation& ChampionInfo)
 {
 	bIsChampion = true;
 	const float Multiplier = FMath::FRandRange(ChampionInfo.ChampionAttributeMultiplierRange.X, ChampionInfo.ChampionAttributeMultiplierRange.Y);
@@ -251,6 +258,8 @@ void AAuraEnemy::SetupChampion(const FChampionInfo& ChampionInfo)
 	Particles->DebuffTag = FAuraGameplayTags::Get().Champion_Regenerator_RegenAmount;
 	Particles->SetAutoDestroy(true);
 	Particles->SetupComponent();
+	if (ChampionInfo.ChampionParticleColors.Contains(ChosenType))
+		Particles->SetColor(ChampionInfo.ChampionParticleColors[ChosenType]);
 	Particles->bAutoActivate = true;
 	Particles->RegisterComponent();
 	switch (ChosenType)

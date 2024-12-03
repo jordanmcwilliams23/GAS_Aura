@@ -28,7 +28,7 @@ public:
 	TSoftObjectPtr<UWorld> DestinationMap;
 
 	UPROPERTY(EditAnywhere)
-	FName DestinationPlayerStartTag;
+	FName DestinationPlayerStartTag = FName("Dungeon1PlayerStart1");
 protected:
 	virtual void BeginPlay() override;
 
@@ -39,6 +39,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> Mesh;
+	
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USphereComponent> Sphere;

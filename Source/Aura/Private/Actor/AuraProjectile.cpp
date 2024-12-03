@@ -94,7 +94,7 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 
 bool AAuraProjectile::IsValidOverlap(const AActor* OtherActor) const
 {
-	//Don't hit owning actor or actors on same team
+	//Don't hit owning actor, friendly actors, or ignored
 	return OtherActor != GetOwner() && UAuraAbilitySystemLibrary::IsNotFriend(GetOwner(), OtherActor) && !IgnoreList.Contains(OtherActor);
 }
 

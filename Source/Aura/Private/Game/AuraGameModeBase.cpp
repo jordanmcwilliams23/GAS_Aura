@@ -14,6 +14,7 @@
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "UI/ViewModel/MVVM_LoadSlot.h"
 #include "GameFramework/Character.h"
+#include "Interaction/HighlightInterface.h"
 #include "Interaction/MapEntranceInterface.h"
 
 void AAuraGameModeBase::PostLogin(APlayerController* NewPlayer)
@@ -115,7 +116,7 @@ void AAuraGameModeBase::TravelToMapStreaming(const FName& MapName) const
 
 AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 {
-	const UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
+	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
 	TArray<AActor*> OutActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), OutActors);
 	if (OutActors.IsEmpty()) return nullptr;
@@ -127,10 +128,9 @@ AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 		
 		if (PlayerStart->PlayerStartTag == AuraGameInstance->PlayerStartTag)
 		{
-			if (PlayerStart->Implements<UMapEntranceInterface>())
+			if (PlayerStart->Implements<UHighlightInterface>())
 			{
-				PlayerControllers[0]->CachedDestination = IMapEntranceInterface::Execute_GetMoveToLocation(PlayerStart);
-				PlayerControllers[0]->BlockInputAndMoveToCachedDestination();
+				IHighlightInterface::Execute_SetMoveToLocation(PlayerStart, AuraGameInstance->InitialMoveToLocation);
 			}
 			SelectedActor = PlayerStart;
 			break;

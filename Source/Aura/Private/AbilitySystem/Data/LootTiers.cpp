@@ -10,7 +10,7 @@ TArray<FLootItem> ULootTiers::GetLootItems(const AAuraEnemy* Enemy) const
 {
 	TArray<FLootItem> ReturnItems;
 
-	FChampionInfo ChampionInfo = UAuraAbilitySystemLibrary::GetChampionInfo(Enemy);
+	FChampionInformation ChampionInfo = UAuraAbilitySystemLibrary::GetChampionInfo(Enemy);
 
 	for (const FLootItem& Item: LootItems)
 	{

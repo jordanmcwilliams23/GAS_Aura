@@ -72,7 +72,7 @@ public:
 	static UAbilityInfo* GetAbilityInfo(const UObject* WorldContext);
 
 	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|ChampionInfo", meta=(DefaultToSelf="WorldContext"))
-	static FChampionInfo GetChampionInfo(const UObject* WorldContext);
+	static FChampionInformation GetChampionInfo(const UObject* WorldContext);
 
 	/*
 	 * Get Effect Context Info

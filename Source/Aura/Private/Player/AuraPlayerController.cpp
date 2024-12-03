@@ -292,13 +292,16 @@ void AAuraPlayerController::SyncOccludedActors()
 	  TArray<TEnumAsByte<EObjectTypeQuery>> CollisionObjectTypes;
 	  CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
 	 
-	  TArray<AActor*> ActorsToIgnore; // TODO: Add configuration to ignore actor types
+	  TArray<AActor*> ActorsToIgnore;
 	  TArray<FHitResult> OutHits;
 	 
 	  auto ShouldDebug = DebugLineTraces ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
 	 
 	  bool bGotHits = UKismetSystemLibrary::CapsuleTraceMultiForObjects(
-	    GetWorld(), Start, End, ActiveCapsuleComponent->GetScaledCapsuleRadius() * CapsulePercentageForTrace,
+	    GetWorld(),
+	    Start,
+	    End,
+	    ActiveCapsuleComponent->GetScaledCapsuleRadius() * CapsulePercentageForTrace,
 	    ActiveCapsuleComponent->GetScaledCapsuleHalfHeight() * CapsulePercentageForTrace, CollisionObjectTypes, true,
 	    ActorsToIgnore,
 	    ShouldDebug,
@@ -425,6 +428,8 @@ void AAuraPlayerController::EnableControls()
 	OnReachedDestination.Remove(EnableControlsDelegateHandle);
 }
 
+
+//Camera Occlusion
 void AAuraPlayerController::ShowOccludedActor(FCameraOccludedActor& OccludedActor)
 	{
 	  if (!IsValid(OccludedActor.Actor))

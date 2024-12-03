@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystem/Data/ChampionInformation.h"
 #include "Character/AuraCharacterBase.h"
 #include "Interaction/TargetInterface.h"
 #include "Aura/AuraTypes.h"
@@ -18,15 +19,6 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FDamageReceivedSignature, float /* Damage */
  * 
  */
 
-UENUM()
-enum class EChampionType : uint8
-{
-	Regenerator = 0,
-	Shooter = 1,
-	Speedy = 2,
-	Splitter = 3
-};
-
 
 UCLASS()
 class AURA_API AAuraEnemy : public AAuraCharacterBase, public ITargetInterface, public IHighlightInterface
@@ -35,22 +27,22 @@ class AURA_API AAuraEnemy : public AAuraCharacterBase, public ITargetInterface, 
 public:
 	AAuraEnemy();
 
-	/** Highlight Interface */
+	/* Highlight Interface */
 	virtual void HighlightActor_Implementation() override;
 	virtual void UnhighlightActor_Implementation() override;
 	virtual bool SetMoveToLocation_Implementation(FVector& OutDestination) override;
-	/** End Highlight Interface */
+	/* End Highlight Interface */
 	
-	/** Target Interface */
+	/* Target Interface */
 	FORCEINLINE virtual void SetCombatTarget_Implementation(AActor* NewCombatTarget) override;
 	FORCEINLINE virtual AActor* GetCombatTarget_Implementation() const override;
-	/** End Target Interface */
+	/* End Target Interface */
 
-	/** Combat Interface */
+	/* Combat Interface */
 	virtual int32 GetCharacterLevel_Implementation() override;
 	virtual void Die(const FVector& DeathImpulse) override;
 	virtual void ReceivedDamage_Implementation(const float Damage) override;
-	/** End Combat Interface */
+	/* End Combat Interface */
 
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 	virtual void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount) override;
@@ -132,7 +124,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void Split(AActor* DeadCharacter);
 
-	void SetupChampion(const FChampionInfo& ChampionInfo);
+	void SetupChampion(const FChampionInformation& ChampionInfo);
 private:
 	
 	UPROPERTY(EditDefaultsOnly)

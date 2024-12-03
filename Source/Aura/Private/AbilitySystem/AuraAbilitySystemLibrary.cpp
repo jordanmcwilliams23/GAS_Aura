@@ -207,11 +207,11 @@ UAbilityInfo* UAuraAbilitySystemLibrary::GetAbilityInfo(const UObject* WorldCont
 	return nullptr;
 }
 
-FChampionInfo UAuraAbilitySystemLibrary::GetChampionInfo(const UObject* WorldContext)
+FChampionInformation UAuraAbilitySystemLibrary::GetChampionInfo(const UObject* WorldContext)
 {
 	if (const AAuraGameModeBase* GameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContext)))
 		return GameModeBase->GetCharacterClassInfo()->ChampionInfo;
-	return FChampionInfo();
+	return FChampionInformation();
 }
 
 bool UAuraAbilitySystemLibrary::IsBlockedHit(const FGameplayEffectContextHandle& ContextHandle)

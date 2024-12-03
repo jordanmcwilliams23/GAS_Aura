@@ -36,7 +36,7 @@ public:
 	virtual void LoadActor_Implementation() override;
 protected:
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USceneComponent> MoveToComponent;
 	
 	UFUNCTION(BlueprintImplementableEvent)

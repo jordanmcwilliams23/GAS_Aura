@@ -51,3 +51,8 @@ void UDebuffNiagaraComponent::SetupComponent()
 		CombatInterface->GetOnDeathDelegate().AddDynamic(this, &UDebuffNiagaraComponent::OnOwnerDeath);
 	}
 }
+
+void UDebuffNiagaraComponent::SetColor(const FLinearColor& Color)
+{
+	SetVariableLinearColor(FName("User.ParticleColor"), Color);
+}

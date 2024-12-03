@@ -24,6 +24,8 @@ public:
 	virtual void Deactivate() override;
 
 	void SetupComponent();
+
+	void SetColor(const FLinearColor& Color);
 protected:
 	UFUNCTION()
 	void OnOwnerDeath(AActor* Character);
