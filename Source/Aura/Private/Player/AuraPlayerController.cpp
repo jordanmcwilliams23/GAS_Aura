@@ -94,6 +94,17 @@ void AAuraPlayerController::SetupInputComponent()
 	AuraInputComponent->BindAbilityActions(AuraInputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
 }
 
+void AAuraPlayerController::UpdateTargetingStatus()
+{
+	if (IsValid(CurrentActor.Get()))
+	{
+		TargetingStatus = CurrentActor->Implements<UTargetInterface>() ? ETargetingStatus::TargetingEnemy : ETargetingStatus::TargetingNonenemy;
+	} else
+	{
+		TargetingStatus = ETargetingStatus::TargetingNonenemy;
+	}
+}
+
 void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 {
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPressed)) return;
@@ -155,13 +166,7 @@ void AAuraPlayerController::UnhighlightActor(AActor* InActor)
 void AAuraPlayerController::AbilityInputTagPressed(const FInputActionInstance& Instance, const FGameplayTag InputTag)
 {
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputPressed)) return;
-	if (IsValid(CurrentActor.Get()))
-	{
-		TargetingStatus = CurrentActor->Implements<UTargetInterface>() ? ETargetingStatus::TargetingEnemy : ETargetingStatus::TargetingNonenemy;
-	} else
-	{
-		TargetingStatus = ETargetingStatus::TargetingNonenemy;
-	}
+	UpdateTargetingStatus();
 	bAutoRunning = false;
 	if (GetASC()) GetASC()->AbilityInputTagPressed(InputTag);
 	
@@ -211,12 +216,15 @@ void AAuraPlayerController::AbilityInputTagHeld(const FInputActionValue& Value, 
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputHeld)) return;
 	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB) && GetASC())
 	{
+		if (GEngine) GEngine->AddOnScreenDebugMessage(9994, 2.f, FColor::Blue, TEXT("Input Held 1"));
 		GetASC()->AbilityInputTagHeld(InputTag);
 		return;
 	}
+	UpdateTargetingStatus();
 	if (TargetingStatus == ETargetingStatus::TargetingEnemy || bShiftKeyDown)
 	{
-		if (GetASC()) GetASC()->AbilityInputTagHeld(InputTag);
+		if (GEngine) GEngine->AddOnScreenDebugMessage(9995, 2.f, FColor::Blue, FString::Printf(TEXT("Targeting Status: %d"), static_cast<int>(TargetingStatus)));
+		GetASC()->AbilityInputTagHeld(InputTag);
 	} else
 	{
 		FollowTime += GetWorld()->GetDeltaSeconds();

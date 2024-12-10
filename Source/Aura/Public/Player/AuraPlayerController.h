@@ -110,6 +110,8 @@ protected:
 	bool DebugLineTraces;
 
 	int NumMenusOpen = 0;
+
+	void UpdateTargetingStatus();
 	
 private:
 
