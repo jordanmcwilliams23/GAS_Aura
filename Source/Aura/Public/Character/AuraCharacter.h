@@ -29,7 +29,7 @@ public:
 	/** End Combat Interface */
 
 	UPROPERTY(EditDefaultsOnly)
-	float DeathTime = 5.f;
+	float DeathTime = 8.f;
 
 	FTimerHandle DeathTimer;
 
@@ -59,6 +59,11 @@ public:
 	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UPassiveNiagaraComponent> ManaSiphonNiagaraComponent;
+
+	float RegenerateManaThreshold = 0.35f;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UGameplayEffect> ManaRegenerationEffect;
 private:
 	virtual void InitAbilityActorInfo() override;
 

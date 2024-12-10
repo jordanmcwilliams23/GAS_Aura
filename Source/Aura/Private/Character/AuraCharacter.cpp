@@ -114,15 +114,16 @@ int32 AAuraCharacter::GetCharacterLevel_Implementation()
 void AAuraCharacter::Die(const FVector& DeathImpulse)
 {
 	Super::Die(DeathImpulse);
-
-	FTimerDelegate DeathTimerDelegate;
-	DeathTimerDelegate.BindLambda([this]()
+	if (const AAuraGameModeBase* AuraGM = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this)))
 	{
-		const AAuraGameModeBase* AuraGM = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this));
-		if (AuraGM)
-			AuraGM->PlayerDied(this);
-	});
-	GetWorldTimerManager().SetTimer(DeathTimer, DeathTimerDelegate, DeathTime, false);
+		FTimerDelegate DeathTimerDelegate;
+		DeathTimerDelegate.BindLambda([this, AuraGM]()
+		{
+			AuraGM->RestartLevel(this);
+		});
+		GetWorldTimerManager().SetTimer(DeathTimer, DeathTimerDelegate, DeathTime, false);
+		AuraGM->OnPlayerDied.Broadcast(this);
+	}
 	CameraComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }
 
@@ -265,8 +266,32 @@ void AAuraCharacter::InitAbilityActorInfo()
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 	OnASCRegistered.Broadcast(AbilitySystemComponent);
 	AttributeSet = AuraPlayerState->GetAttributeSet();
+	const UAuraAttributeSet* AuraAttributeSet = Cast<UAuraAttributeSet>(AttributeSet);
 	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Debuff_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AAuraCharacter::StunTagChanged);
 	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Debuff_Burn, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AAuraCharacter::BurnTagChanged);
+
+	//Mana Regeneration
+	const FGameplayEffectContextHandle ContextHandle = AbilitySystemComponent->MakeEffectContext();
+	const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(ManaRegenerationEffect, 1.f, ContextHandle);
+	AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
+	
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetManaAttribute())
+		.AddLambda(
+			[this](const FOnAttributeChangeData& Data)
+			{
+				const UAuraAttributeSet* AuraAttributeSet = Cast<UAuraAttributeSet>(AttributeSet);
+				if (Data.NewValue / AuraAttributeSet->GetMaxMana() <= RegenerateManaThreshold)
+				{
+					FGameplayTag LowManaTag = FAuraGameplayTags::Get().Status_LowMana;
+					if (!AbilitySystemComponent->HasMatchingGameplayTag(LowManaTag))
+						AbilitySystemComponent->AddLooseGameplayTag(LowManaTag);
+				} else
+				{
+					FGameplayTag LowManaTag = FAuraGameplayTags::Get().Status_LowMana;
+					if (AbilitySystemComponent->HasMatchingGameplayTag(LowManaTag))
+						AbilitySystemComponent->RemoveLooseGameplayTag(LowManaTag);
+				}
+			});
 	
 	AbilitySystemComponent->InitAbilityActorInfo(AuraPlayerState, this);
 

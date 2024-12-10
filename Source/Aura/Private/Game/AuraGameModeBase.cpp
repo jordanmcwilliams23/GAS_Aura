@@ -159,11 +159,11 @@ void AAuraGameModeBase::SaveInGameProgressData(ULoadScreenSaveGame* SaveObject) 
 	UGameplayStatics::SaveGameToSlot(SaveObject, InGameLoadSlotName, InGameLoadSlotIndex);
 }
 
-void AAuraGameModeBase::PlayerDied(const ACharacter* DeadCharacter) const
+void AAuraGameModeBase::RestartLevel(const ACharacter* PlayerCharacter) const
 {
 	const ULoadScreenSaveGame* SaveGame = RetrieveInGameSaveData();
 	if (!IsValid(SaveGame)) return;
-	UGameplayStatics::OpenLevel(DeadCharacter, FName(SaveGame->MapAssetName));
+	UGameplayStatics::OpenLevel(PlayerCharacter, FName(SaveGame->MapAssetName));
 }
 
 void AAuraGameModeBase::SaveWorldState(UWorld* World, const FString& DestinationMapAssetName) const

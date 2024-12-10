@@ -47,6 +47,8 @@ void FAuraGameplayTags::InitializeNativeTags()
 	/* Status Tags */
 	GameplayTags.Status_Dead = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Status.Dead"),
 			FString("Applied to dead character"));
+	GameplayTags.Status_LowMana = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Status.LowMana"),
+			FString("Applied to player when low on mana"));
 	
 	/* Input Tags */
 	GameplayTags.InputTag = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag"),

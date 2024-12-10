@@ -3,6 +3,10 @@
 
 #include "Checkpoint/MapEntrance.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
+#include "AuraGameplayTags.h"
+#include "Blueprint/UserWidget.h"
 #include "Components/SphereComponent.h"
 #include "Interaction/GameModeInterface.h"
 #include "Interaction/PlayerInterface.h"
@@ -32,6 +36,12 @@ void AMapEntrance::HighlightActor_Implementation()
 	Mesh->SetRenderCustomDepth(true);
 }
 
+bool AMapEntrance::SetMoveToLocation_Implementation(FVector& OutDestination)
+{
+	OutDestination = Sphere->GetComponentLocation();
+	return true;
+}
+
 void AMapEntrance::BeginPlay()
 {
 	Super::BeginPlay();
@@ -43,6 +53,26 @@ void AMapEntrance::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 {
 	if (OtherActor->Implements<UPlayerInterface>())
 	{
+		if (bEndGameInstead)
+		{
+			UUserWidget* EndScreenWidget = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(this, 0), EndScreenWidgetClass);
+			EndScreenWidget->AddToViewport();
+			UGameplayStatics::PlaySound2D(this, EndScreenSound);
+
+			//Block player input
+			if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
+			{
+				FAuraGameplayTags AuraTags = FAuraGameplayTags::Get();
+				const FGameplayTagContainer BlockedTags = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>({
+				AuraTags.Player_Block_CursorTrace,
+				AuraTags.Player_Block_InputHeld,
+				AuraTags.Player_Block_InputPressed,
+				AuraTags.Player_Block_InputReleased}));
+				ASC->AddLooseGameplayTags(BlockedTags);
+			}
+			Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			return;
+		}
 		if (const IGameModeInterface* GameModeInterface = Cast<IGameModeInterface>(UGameplayStatics::GetGameMode(this)))
 		{
 			GameModeInterface->SaveWorldState(GetWorld(), DestinationMap.ToSoftObjectPath().GetAssetName());

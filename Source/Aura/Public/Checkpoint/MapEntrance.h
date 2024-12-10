@@ -23,12 +23,22 @@ public:
 
 	//Highlight Interface
 	virtual void HighlightActor_Implementation() override;
+	virtual bool SetMoveToLocation_Implementation(FVector& OutDestination) override;
 
 	UPROPERTY(EditAnywhere)
 	TSoftObjectPtr<UWorld> DestinationMap;
 
 	UPROPERTY(EditAnywhere)
 	FName DestinationPlayerStartTag = FName("Dungeon1PlayerStart1");
+
+	UPROPERTY(EditInstanceOnly)
+	bool bEndGameInstead = false;
+	
+	UPROPERTY(EditInstanceOnly)
+	TSubclassOf<UUserWidget> EndScreenWidgetClass;
+
+	UPROPERTY(EditInstanceOnly)
+	TObjectPtr<USoundBase> EndScreenSound;
 protected:
 	virtual void BeginPlay() override;
 

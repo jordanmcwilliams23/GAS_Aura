@@ -59,6 +59,7 @@ public:
 
 	/* Status Tags */
 	FGameplayTag Status_Dead;
+	FGameplayTag Status_LowMana;
 
 	/* Input Tags */
 	FGameplayTag InputTag;

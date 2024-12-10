@@ -8,6 +8,8 @@
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "AbilitySystem/Data/LevelUpInfo.h"
+#include "Game/AuraGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerState.h"
 
 void UOverlayWidgetController::BroadcastInitialValues()
@@ -28,6 +30,15 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	{
 		OnPlayerLevelChangedDelegate.Broadcast(NewLevel, bLevelUp);
 	});
+
+	if (AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this)))
+	{
+		AuraGameModeBase->OnPlayerDied.AddLambda(
+			[this](const ACharacter* DeadCharacter)
+			{
+				OnPlayerDied.Broadcast(DeadCharacter);
+			});
+	}
 
 	//Bind HealthChanged to when health attribute changes
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetHealthAttribute())

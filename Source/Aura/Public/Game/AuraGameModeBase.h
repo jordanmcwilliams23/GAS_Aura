@@ -14,6 +14,8 @@ class UMVVM_LoadSlot;
 class ULevelUpInfo;
 class UCharacterClassInfo;
 class AAuraPlayerController;
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FPlayerDiedSignature, const ACharacter*)
 /**
  * 
  */
@@ -77,7 +79,9 @@ public:
 	ULoadScreenSaveGame* RetrieveInGameSaveData() const;
 	void SaveInGameProgressData(ULoadScreenSaveGame* SaveObject) const;
 
-	void PlayerDied(const ACharacter* DeadCharacter) const;
+	void RestartLevel(const ACharacter* PlayerCharacter) const;
+
+	FPlayerDiedSignature OnPlayerDied;
 protected:
 	virtual void BeginPlay() override;
 private:

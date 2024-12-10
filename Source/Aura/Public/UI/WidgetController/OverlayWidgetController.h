@@ -13,6 +13,7 @@ class UAbilityInfo;
 class UAuraUserWidget;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnLevelUp, int32, CurrentLevel , bool, bLevelUp);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDied, const ACharacter*, DeadCharacter);
 
 USTRUCT(BlueprintType)
 struct FUIWidgetRow: public FTableRowBase
@@ -66,6 +67,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category="GAS|Messages")
 	FMessageWidgetRowSignature OnMessageWidgetRow;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerDied OnPlayerDied;
 	
 	void OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const FGameplayTag& InputTag, const FGameplayTag& PrevInputTag);
 protected:

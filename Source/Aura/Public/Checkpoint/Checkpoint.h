@@ -56,6 +56,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USphereComponent> Sphere;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<USoundBase> ActivateSound;
+
 	UPROPERTY(EditDefaultsOnly)
 	int32 CustomDepthRenderValue = CUSTOM_DEPTH_TAN;
 };

@@ -101,11 +101,15 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 
 void UAuraAttributeSet::ShowFloatingText(const FEffectProperties& Props, const float Damage, const bool bIsBlockedHit, const bool bIsCriticalHit)
 {
+	Cast<AAuraPlayerController>(UGameplayStatics::GetPlayerController(Props.SourceCharacter, 0))
+	->ShowDamageNumber(Damage, Props.TargetCharacter.Get(), bIsBlockedHit, bIsCriticalHit);
+	/* //For showing damage numbers to all players, not used since currently single-player focused
 	const TArray<AAuraPlayerController*>& PlayerControllers = UAuraAbilitySystemLibrary::GetAllPlayerControllers(Props.SourceCharacter);
 	for (AAuraPlayerController* AuraPlayerController: PlayerControllers)
 	{
 		AuraPlayerController->ShowDamageNumber(Damage, Props.TargetCharacter.Get(), bIsBlockedHit, bIsCriticalHit);
 	}
+	*/
 }
 
 void UAuraAttributeSet::SendXPEvent(const FEffectProperties& EffectProperties) const
