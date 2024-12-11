@@ -42,7 +42,7 @@ public:
 	void LevelUp();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, meta=(DefaultToSelf="Target"))
-	void ShowTargetingActor(TSubclassOf<ATargetingActor> TargetingActorSubclass, const bool bInShow, UMaterialInterface* Material = nullptr, float Radius = 0.f);
+	ATargetingActor* ShowTargetingActor(TSubclassOf<ATargetingActor> TargetingActorSubclass, const bool bInShow, UMaterialInterface* Material = nullptr, float Radius = 0.f);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, meta=(DefaultToSelf="Target"))
 	void SaveProgress(const FName& CheckpointTag);

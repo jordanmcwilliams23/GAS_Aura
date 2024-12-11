@@ -9,7 +9,7 @@
 class USphereComponent;
 class UDecalComponent;
 
-UCLASS()
+UCLASS(BlueprintType)
 class AURA_API ATargetingActor : public AActor
 {
 	GENERATED_BODY()
@@ -21,6 +21,8 @@ public:
 	void SetTargetingSphereRadius(const float Radius) const;
 
 	FORCEINLINE UDecalComponent* GetDecalComponent() const { return TargetingDecal; }
+
+	void DestroyAfterTime(const float Time = 0.f);
 
 protected:
 	virtual void BeginPlay() override;

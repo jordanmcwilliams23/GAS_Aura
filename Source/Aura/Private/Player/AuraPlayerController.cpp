@@ -282,6 +282,31 @@ void AAuraPlayerController::BlockInputAndMoveToCachedDestination()
 	}
 }
 
+void AAuraPlayerController::UpdateMagicCircleLocation() const
+{
+	if (IsValid(TargetingActor))
+	{
+		if (FHitResult HitResult; GetHitResultUnderCursor(ECC_IgnorePawns, false, HitResult))
+		{
+			TargetingActor->SetActorLocation(HitResult.Location);
+			TargetingActor->SetActorRotation(HitResult.Normal.Rotation());
+		}
+	}
+}
+
+void AAuraPlayerController::EnableControls()
+{
+	const FAuraGameplayTags& AuraTags = FAuraGameplayTags::Get();
+	const FGameplayTagContainer BlockedTags = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>({
+				AuraTags.Player_Block_CursorTrace,
+				AuraTags.Player_Block_InputHeld,
+				AuraTags.Player_Block_InputPressed,
+				AuraTags.Player_Block_InputReleased}));
+	GetASC()->RemoveLooseGameplayTags(BlockedTags);
+	OnReachedDestination.Remove(EnableControlsDelegateHandle);
+}
+
+
 void AAuraPlayerController::SyncOccludedActors()
 	{
 	  if (!ShouldCheckCameraOcclusion()) return;
@@ -411,31 +436,6 @@ void AAuraPlayerController::ForceShowOccludedActors()
 	    }
 	  }
 	}
-
-void AAuraPlayerController::UpdateMagicCircleLocation() const
-{
-	if (IsValid(TargetingActor))
-	{
-		if (FHitResult HitResult; GetHitResultUnderCursor(ECC_IgnorePawns, false, HitResult))
-		{
-			TargetingActor->SetActorLocation(HitResult.Location);
-			TargetingActor->SetActorRotation(HitResult.Normal.Rotation());
-		}
-	}
-}
-
-void AAuraPlayerController::EnableControls()
-{
-	const FAuraGameplayTags& AuraTags = FAuraGameplayTags::Get();
-	const FGameplayTagContainer BlockedTags = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>({
-				AuraTags.Player_Block_CursorTrace,
-				AuraTags.Player_Block_InputHeld,
-				AuraTags.Player_Block_InputPressed,
-				AuraTags.Player_Block_InputReleased}));
-	GetASC()->RemoveLooseGameplayTags(BlockedTags);
-	OnReachedDestination.Remove(EnableControlsDelegateHandle);
-}
-
 
 //Camera Occlusion
 void AAuraPlayerController::ShowOccludedActor(FCameraOccludedActor& OccludedActor)

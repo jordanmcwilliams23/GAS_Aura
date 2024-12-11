@@ -38,7 +38,6 @@ void AAuraFireball::OnHit()
 		CueParams.Location = GetActorLocation();
 		UGameplayCueManager::ExecuteGameplayCue_NonReplicated(GetOwner(), FAuraGameplayTags::Get().GameplayCue_FireBlast, CueParams);
 	}
-	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
 	bHit = true;
 }
 

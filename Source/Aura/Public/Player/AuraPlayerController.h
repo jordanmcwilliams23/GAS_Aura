@@ -81,6 +81,18 @@ public:
 	FOnReachedDestination OnReachedDestination;
 	
 	FVector CachedDestination = FVector::ZeroVector;
+
+	UPROPERTY()
+	TObjectPtr<ATargetingActor> TargetingActor;
+
+	void SetTargetingActor(ATargetingActor* Target, const float DestroyTime = 1.f)
+	{
+		if (!Target && TargetingActor)
+		{
+			TargetingActor->DestroyAfterTime(DestroyTime);
+		} 
+		TargetingActor = Target;
+	}
 	
 protected:
 	virtual void BeginPlay() override;
@@ -88,7 +100,7 @@ protected:
 	
 	//Occlusion
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera Occlusion|Occlusion",
-		meta=(ClampMin="0.1", ClampMax="10.0") )
+		meta=(ClampMin="0.1", ClampMax="10.0"))
 	float CapsulePercentageForTrace;
 	  
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera Occlusion|Materials")
@@ -141,9 +153,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USplineComponent> Spline;
-	
-	UPROPERTY()
-	TObjectPtr<ATargetingActor> TargetingActor;
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UNiagaraSystem> ClickNiagaraSystem;

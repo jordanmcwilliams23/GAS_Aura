@@ -21,6 +21,18 @@ ATargetingActor::ATargetingActor()
 	TargetingDecal->SetupAttachment(GetRootComponent());
 }
 
+void ATargetingActor::DestroyAfterTime(const float Time)
+{
+	FTimerHandle DestroyTimerHandle;
+	FTimerDelegate DestroyTimerDelegate;
+	DestroyTimerDelegate.BindLambda(
+		[this]()
+		{
+			this->Destroy();
+		});
+	GetWorldTimerManager().SetTimer(DestroyTimerHandle, DestroyTimerDelegate, Time, false);
+}
+
 void ATargetingActor::BeginPlay()
 {
 	Super::BeginPlay();

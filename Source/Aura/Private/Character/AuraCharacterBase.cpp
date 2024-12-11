@@ -52,12 +52,11 @@ void AAuraCharacterBase::OnRep_Stunned()
 	if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
 	{
 		const FAuraGameplayTags& AuraTags = FAuraGameplayTags::Get();
-		FGameplayTagContainer BlockedTags;
-		BlockedTags.AddTag(AuraTags.Player_Block_CursorTrace);
-		BlockedTags.AddTag(AuraTags.Player_Block_InputHeld);
-		BlockedTags.AddTag(AuraTags.Player_Block_InputPressed);
-		BlockedTags.AddTag(AuraTags.Player_Block_InputReleased);
-
+		FGameplayTagContainer InTags;
+		InTags.AddTag(AuraTags.Player_Block_CursorTrace);
+		InTags.AddTag(AuraTags.Player_Block_InputHeld);
+		InTags.AddTag(AuraTags.Player_Block_InputPressed);
+		InTags.AddTag(AuraTags.Player_Block_InputReleased);
 		if (bIsStunned)
 		{
 			if (!GetAbilitySystemComponent()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Debuff_Stun))
@@ -65,15 +64,15 @@ void AAuraCharacterBase::OnRep_Stunned()
 				UDebuffNiagaraComponent* StunDebuffComponent = NewObject<UDebuffNiagaraComponent>(this);
 				StunDebuffComponent->SetAsset(StunNiagaraSystemClass);
 				StunDebuffComponent->SetupAttachment(GetRootComponent());
+				StunDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Stun;
 				StunDebuffComponent->RegisterComponent();
 				StunDebuffComponent->SetupComponent();
-				StunDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Stun;
-				AuraASC->AddLooseGameplayTags(BlockedTags);
+				AuraASC->AddLooseGameplayTags(InTags);
 				StunDebuffComponent->Activate();
 			}
 		} else
 		{
-			AuraASC->RemoveLooseGameplayTags(BlockedTags);
+			AuraASC->RemoveLooseGameplayTags(InTags);
 			//StunDebuffComponent->Deactivate();
 		}
 	}
@@ -81,13 +80,13 @@ void AAuraCharacterBase::OnRep_Stunned()
 
 void AAuraCharacterBase::OnRep_Burning()
 {
-	
 	if (bIsBurning && !GetAbilitySystemComponent()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Debuff_Burn))
 	{
 		UDebuffNiagaraComponent* BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnDebuffComponent");
 		BurnDebuffComponent->SetupAttachment(GetRootComponent());
 		BurnDebuffComponent->RegisterComponent();
 		BurnDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Burn;
+		BurnDebuffComponent->SetupComponent();
 		BurnDebuffComponent->Activate();
 	} else
 	{
@@ -97,8 +96,33 @@ void AAuraCharacterBase::OnRep_Burning()
 
 void AAuraCharacterBase::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
+	const bool bPreviouslyStunned = bIsStunned;
 	bIsStunned = NewCount > 0;
 	GetCharacterMovement()->MaxWalkSpeed = bIsStunned ? 0.f : BaseWalkSpeed;
+	if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
+	{
+		const FAuraGameplayTags& AuraTags = FAuraGameplayTags::Get();
+		FGameplayTagContainer InTags;
+		InTags.AddTag(AuraTags.Player_Block_CursorTrace);
+		InTags.AddTag(AuraTags.Player_Block_InputHeld);
+		InTags.AddTag(AuraTags.Player_Block_InputPressed);
+		InTags.AddTag(AuraTags.Player_Block_InputReleased);
+		
+		if (bIsStunned && !bPreviouslyStunned)
+		{
+			UDebuffNiagaraComponent* StunDebuffComponent = NewObject<UDebuffNiagaraComponent>(this);
+			StunDebuffComponent->SetAsset(StunNiagaraSystemClass);
+			StunDebuffComponent->SetupAttachment(GetRootComponent());
+			StunDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Stun;
+			StunDebuffComponent->RegisterComponent();
+			StunDebuffComponent->SetupComponent();
+			AuraASC->AddLooseGameplayTags(InTags);
+			StunDebuffComponent->Activate();
+		} else if (!bIsStunned && bPreviouslyStunned)
+		{
+			AuraASC->RemoveLooseGameplayTags(InTags);
+		}
+	}
 }
 
 void AAuraCharacterBase::BurnTagChanged(const FGameplayTag CallbackTag, int32 NewCount)

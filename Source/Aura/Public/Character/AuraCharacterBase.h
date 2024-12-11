@@ -7,6 +7,7 @@
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Aura/AuraTypes.h"
 #include "Interaction/CombatInterface.h"
+#include "GameplayTagContainer.h"
 #include "AuraCharacterBase.generated.h"
 
 class UPassiveNiagaraComponent;

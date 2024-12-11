@@ -56,4 +56,6 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly)
 	int32 CustomDepthRenderValue = CUSTOM_DEPTH_TAN;
+
+	void EndGameScreen(AActor* OtherActor) const;
 };

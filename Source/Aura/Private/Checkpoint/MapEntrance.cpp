@@ -8,6 +8,7 @@
 #include "AuraGameplayTags.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/SphereComponent.h"
+#include "Game/AuraGameModeBase.h"
 #include "Interaction/GameModeInterface.h"
 #include "Interaction/PlayerInterface.h"
 #include "Kismet/GameplayStatics.h"
@@ -55,22 +56,7 @@ void AMapEntrance::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 	{
 		if (bEndGameInstead)
 		{
-			UUserWidget* EndScreenWidget = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(this, 0), EndScreenWidgetClass);
-			EndScreenWidget->AddToViewport();
-			UGameplayStatics::PlaySound2D(this, EndScreenSound);
-
-			//Block player input
-			if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
-			{
-				FAuraGameplayTags AuraTags = FAuraGameplayTags::Get();
-				const FGameplayTagContainer BlockedTags = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>({
-				AuraTags.Player_Block_CursorTrace,
-				AuraTags.Player_Block_InputHeld,
-				AuraTags.Player_Block_InputPressed,
-				AuraTags.Player_Block_InputReleased}));
-				ASC->AddLooseGameplayTags(BlockedTags);
-			}
-			Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			EndGameScreen(OtherActor);
 			return;
 		}
 		if (const IGameModeInterface* GameModeInterface = Cast<IGameModeInterface>(UGameplayStatics::GetGameMode(this)))
@@ -79,12 +65,32 @@ void AMapEntrance::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 		}
 		IPlayerInterface::Execute_SaveProgress(OtherActor, DestinationPlayerStartTag);
 
-		if (DestinationMap == nullptr)
+		/* if (DestinationMap == nullptr)
 		{
 			if (GEngine)
 				GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::Red, TEXT("Map Entrance doesn't have a destination map set!"));
 			return;
-		}
+		} */
 		UGameplayStatics::OpenLevelBySoftObjectPtr(this, DestinationMap);
 	}
+}
+
+void AMapEntrance::EndGameScreen(AActor* OtherActor) const
+{
+	UUserWidget* EndScreenWidget = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(this, 0), EndScreenWidgetClass);
+	EndScreenWidget->AddToViewport();
+	UGameplayStatics::PlaySound2D(this, EndScreenSound);
+
+	//Block player input
+	if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
+	{
+		FAuraGameplayTags AuraTags = FAuraGameplayTags::Get();
+		const FGameplayTagContainer BlockedTags = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>({
+		AuraTags.Player_Block_CursorTrace,
+		AuraTags.Player_Block_InputHeld,
+		AuraTags.Player_Block_InputPressed,
+		AuraTags.Player_Block_InputReleased}));
+		ASC->AddLooseGameplayTags(BlockedTags);
+	}
+	Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

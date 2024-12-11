@@ -162,13 +162,21 @@ void AAuraCharacter::AddSpellPoints_Implementation(const int32 Points)
 	AuraPlayerState->AddSpellPoints(Points);
 }
 
-void AAuraCharacter::ShowTargetingActor_Implementation(const TSubclassOf<ATargetingActor> TargetingActorSubclass, const bool bInShow, UMaterialInterface* Material, float Radius)
+ATargetingActor* AAuraCharacter::ShowTargetingActor_Implementation(const TSubclassOf<ATargetingActor> TargetingActorSubclass, const bool bInShow, UMaterialInterface* Material, float Radius)
 {
 	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
 	{
-		AuraPlayerController->ShowTargetingActor(TargetingActorSubclass, bInShow, Material, Radius);
 		AuraPlayerController->bShowMouseCursor = !bInShow;
+		if (TargetingActorSubclass == nullptr)
+		{
+			AuraPlayerController->SetTargetingActor(nullptr);
+		} else
+		{
+			AuraPlayerController->ShowTargetingActor(TargetingActorSubclass, bInShow, Material, Radius);
+		}
+		return  AuraPlayerController->TargetingActor;
 	}
+	return nullptr;
 }
 
 void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)

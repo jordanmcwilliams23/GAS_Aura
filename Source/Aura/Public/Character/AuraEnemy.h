@@ -82,7 +82,7 @@ protected:
 
 	FDamageReceivedSignature OnDamageReceived;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character Class Defaults")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character Class Defaults", meta=(ExposeOnSpawn="true"))
 	int32 Level = 1;
 	
 

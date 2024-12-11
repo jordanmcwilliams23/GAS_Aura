@@ -271,7 +271,8 @@ void AAuraEnemy::SetupChampion(const FChampionInformation& ChampionInfo)
 		ShooterAbility();
 		break;
 	case EChampionType::Speedy:
-		GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed * ChampionInfo.Speedy_SpeedMultiplier;
+		BaseWalkSpeed *= ChampionInfo.Speedy_SpeedMultiplier;
+		GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 		break;
 	case EChampionType::Splitter:
 		OnDeath.AddDynamic(this, &AAuraEnemy::Split);
