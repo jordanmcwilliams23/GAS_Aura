@@ -4,6 +4,9 @@
  I can proudly say that my C++ skills especially, and UE skills as a whole, improved drastically over the **300+ hours** put into this project. I'm a firm believer that what you put in you get back out, whether it be a project, hobby, in school, or life in general, so **always give it your all!** I went above and beyond as much as I could refactoring and improving code, creating content and new features, and even a new modular mechanic (Champion enemy types)! I'm happy with the addition of this extra mechanic, it adds some more variety and fun to each encounter.
 
 [Course Link](https://www.udemy.com/course/unreal-engine-5-gas-top-down-rpg/)
+
+
+![](https://github.com/jordanmcwilliams23/GAS_Aura/blob/main/Data/Images/AuraTitleScreen.PNG)
 ## Features
 - OOP with inheritance and polymorphism for a flexible, extensible class heirarchy
   
