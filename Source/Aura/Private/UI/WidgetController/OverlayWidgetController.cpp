@@ -33,11 +33,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 
 	if (AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this)))
 	{
-		AuraGameModeBase->OnPlayerDied.AddLambda(
-			[this](const ACharacter* DeadCharacter)
-			{
-				OnPlayerDied.Broadcast(DeadCharacter);
-			});
+		AuraGameModeBase->OnPlayerDied.AddDynamic(this, &UOverlayWidgetController::PlayerDied);
 	}
 
 	//Bind HealthChanged to when health attribute changes
@@ -100,8 +96,13 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	}
 }
 
+void UOverlayWidgetController::PlayerDied(const ACharacter* DeadCharacter)
+{
+	OnPlayerDied.Broadcast(DeadCharacter);
+}
+
 void UOverlayWidgetController::OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag,
-	const FGameplayTag& InputTag, const FGameplayTag& PrevInputTag)
+                                                 const FGameplayTag& InputTag, const FGameplayTag& PrevInputTag)
 {
 	const FAuraGameplayTags& Tags = FAuraGameplayTags::Get();
 	

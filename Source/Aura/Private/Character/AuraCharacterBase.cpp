@@ -226,6 +226,7 @@ bool AAuraCharacterBase::IsBeingShocked_Implementation() const
 void AAuraCharacterBase::SetBeingShocked_Implementation(const bool InBeingShocked)
 {
 	bIsBeingShocked = InBeingShocked;
+	GetCharacterMovement()->MaxWalkSpeed = bIsBeingShocked ? 0.f : BaseWalkSpeed;
 }
 
 FOnFloatChangedSignature& AAuraCharacterBase::GetOnDamageSignature()

@@ -20,7 +20,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FDamageReceivedSignature, float /* Damage */
  */
 
 
-UCLASS()
+UCLASS(Abstract)
 class AURA_API AAuraEnemy : public AAuraCharacterBase, public ITargetInterface, public IHighlightInterface
 {
 	GENERATED_BODY()
@@ -42,6 +42,7 @@ public:
 	virtual int32 GetCharacterLevel_Implementation() override;
 	virtual void Die(const FVector& DeathImpulse) override;
 	virtual void ReceivedDamage_Implementation(const float Damage) override;
+	virtual bool IsChampion_Implementation() const override { return bIsChampion; }
 	/* End Combat Interface */
 
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);

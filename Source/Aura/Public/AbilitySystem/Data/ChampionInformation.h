@@ -27,13 +27,13 @@ struct FChampionInformation
 
 	//General
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Champion")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Champion")
 	bool bChampionsEnabled = true;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Champion")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Champion")
 	FVector2f ChampionAttributeMultiplierRange = FVector2f(1.2f, 2.f);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Champion")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Champion")
 	float ScaleMultiplier = 1.2f;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Champion")
@@ -42,11 +42,14 @@ struct FChampionInformation
 	UPROPERTY(EditDefaultsOnly, Category="Champion")
 	TMap<EChampionType, FLinearColor> ChampionParticleColors;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Champion")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Champion")
 	int32 ExtraNumLootItems = 1;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Champion")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Champion")
 	float ExtraSpawnLootChance = 5.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Champion")
+	float ExperienceMultiplier = 1.5f;
 
 	//Regenerator
 	

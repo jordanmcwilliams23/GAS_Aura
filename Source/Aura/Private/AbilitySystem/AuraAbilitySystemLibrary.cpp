@@ -617,8 +617,11 @@ FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect(const 
 			EffectContext->SetRadialDamageOrigin(Params.RadialDamageOrigin);
 		}
 	}
-	
+
+	//Not sure why the target ASC applies the damage to itself, but that's the approach
 	Params.SourceASC->ApplyGameplayEffectSpecToTarget(*Spec.Data, Params.TargetASC);
+	
+	//Params.TargetASC->ApplyGameplayEffectSpecToSelf(*Spec.Data);
 	return Context;
 }
 
@@ -663,4 +666,9 @@ TArray<FVector> UAuraAbilitySystemLibrary::EvenlyRotatedVectors(const FVector& F
 		Vectors.Add(Direction);
 	}
 	return Vectors;
+}
+
+AAuraGameModeBase* UAuraAbilitySystemLibrary::GetAuraGameModeBase(const UObject* WorldContext)
+{
+	return Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContext));
 }

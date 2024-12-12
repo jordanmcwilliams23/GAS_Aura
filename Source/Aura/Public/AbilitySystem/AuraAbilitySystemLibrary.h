@@ -10,6 +10,7 @@
 #include "UI/WidgetController/AuraWidgetController.h"
 #include "AuraAbilitySystemLibrary.generated.h"
 
+class AAuraGameModeBase;
 class ULootTiers;
 class ULoadScreenSaveGame;
 class USpellMenuWidgetController;
@@ -212,4 +213,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayMechanics")
 	static TArray<FVector> EvenlyRotatedVectors(const FVector& Forward, const FVector& Axis, const float Spread, const int32 NumVectors);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayMechanics", meta=(DefaultToSelf = "WorldContext"))
+	static AAuraGameModeBase* GetAuraGameModeBase(const UObject* WorldContext);
 };

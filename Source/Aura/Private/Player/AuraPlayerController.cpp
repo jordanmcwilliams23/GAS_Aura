@@ -216,14 +216,12 @@ void AAuraPlayerController::AbilityInputTagHeld(const FInputActionValue& Value, 
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FAuraGameplayTags::Get().Player_Block_InputHeld)) return;
 	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB) && GetASC())
 	{
-		if (GEngine) GEngine->AddOnScreenDebugMessage(9994, 2.f, FColor::Blue, TEXT("Input Held 1"));
 		GetASC()->AbilityInputTagHeld(InputTag);
 		return;
 	}
 	UpdateTargetingStatus();
 	if (TargetingStatus == ETargetingStatus::TargetingEnemy || bShiftKeyDown)
 	{
-		if (GEngine) GEngine->AddOnScreenDebugMessage(9995, 2.f, FColor::Blue, FString::Printf(TEXT("Targeting Status: %d"), static_cast<int>(TargetingStatus)));
 		GetASC()->AbilityInputTagHeld(InputTag);
 	} else
 	{

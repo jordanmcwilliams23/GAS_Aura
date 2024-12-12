@@ -70,6 +70,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerDied OnPlayerDied;
+
+	UFUNCTION()
+	void PlayerDied(const ACharacter* DeadCharacter);
 	
 	void OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const FGameplayTag& InputTag, const FGameplayTag& PrevInputTag);
 protected:

@@ -117,7 +117,11 @@ void UAuraAttributeSet::SendXPEvent(const FEffectProperties& EffectProperties) c
 	if (EffectProperties.TargetCharacter->Implements<UCombatInterface>())
 	{
 		const int32 TargetLevel = ICombatInterface::Execute_GetCharacterLevel(EffectProperties.TargetCharacter);
-		const float XPReward = UAuraAbilitySystemLibrary::GetXPAmount(this, ICombatInterface::Execute_GetCharacterClass(EffectProperties.TargetCharacter.Get()), TargetLevel);
+		float XPReward = UAuraAbilitySystemLibrary::GetXPAmount(this, ICombatInterface::Execute_GetCharacterClass(EffectProperties.TargetCharacter.Get()), TargetLevel);
+		if (ICombatInterface::Execute_IsChampion(EffectProperties.TargetCharacter))
+		{
+			XPReward *= UAuraAbilitySystemLibrary::GetChampionInfo(EffectProperties.TargetCharacter).ExperienceMultiplier;
+		}
 		FGameplayEventData GameplayEventData = FGameplayEventData();
 		GameplayEventData.EventTag = FAuraGameplayTags::Get().Attributes_Meta_IncomingXP;
 		GameplayEventData.EventMagnitude = XPReward;
@@ -133,7 +137,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	Super::PostGameplayEffectExecute(Data);
 	FEffectProperties Props;
 	SetEffectProperties(Data, Props);
-
+	
 	//return if character is dead
 	if (Props.TargetCharacter->Implements<UCombatInterface>() && ICombatInterface::Execute_IsDead(Props.TargetCharacter)) return;
 
@@ -156,7 +160,12 @@ void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 {
 	const float LocalIncomingDamage = GetIncomingDamage();
 	SetIncomingDamage(0.f);
-	if (LocalIncomingDamage <= 0.f) return;
+	const bool appliedDebuff = UAuraAbilitySystemLibrary::DidApplyDebuff(Props.EffectContextHandle);
+	if (UAuraAbilitySystemLibrary::DidApplyDebuff(Props.EffectContextHandle)) Debuff(Props);
+	if (LocalIncomingDamage <= 0.f)
+	{
+		return;
+	}
 	const float NewHealth = GetHealth() - LocalIncomingDamage;
 	SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
 	if (NewHealth > 0.f)
@@ -190,7 +199,6 @@ void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 	const bool bBlock = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
 	const bool bCriticalHit = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
 	ShowFloatingText(Props, LocalIncomingDamage, bBlock, bCriticalHit);
-	if (UAuraAbilitySystemLibrary::DidApplyDebuff(Props.EffectContextHandle)) Debuff(Props);
 }
 
 void UAuraAttributeSet::HandleIncomingXP(const FEffectProperties& Props)

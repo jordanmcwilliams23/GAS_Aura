@@ -10,7 +10,6 @@
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Interaction/CombatInterface.h"
-#include "Kismet/KismetMathLibrary.h"
 
 //Raw struct for internal C++ use here, notice no 'F' prefix or USTRUCT()
 struct AuraDamageStatics
@@ -148,7 +147,12 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	//Get Damage Set by caller
 	float Damage = OwningSpec.GetSetByCallerMagnitude(DamageTypeTag, false, 0.f);
-	if (Damage <= 0.f) return;
+	if (Damage <= 0.f)
+	{
+		const FGameplayModifierEvaluatedData EvaluatedData(UAuraAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, Damage);
+		OutExecutionOutput.AddOutputModifier(EvaluatedData);
+		return;
+	}
 	
 	float Resistance = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(CaptureDef, EvaluateParameters, Resistance);
@@ -166,6 +170,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	float TargetBlockChance = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().BlockChanceDef, EvaluateParameters, TargetBlockChance);
 	TargetBlockChance = FMath::Clamp(TargetBlockChance, 0.f, TargetBlockChance);
+	
 	//If block, half the damage
 	if (const float RNG = FMath::RandRange(1, 100); TargetBlockChance > RNG)
 	{

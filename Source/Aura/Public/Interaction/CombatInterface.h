@@ -109,4 +109,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void ReceivedDamage(const float Damage);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	bool IsChampion() const;
 };

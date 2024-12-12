@@ -63,9 +63,6 @@ void ACheckpoint::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	{
 		bReached = true;
 		
-		if (ActivateSound)
-			UGameplayStatics::PlaySoundAtLocation(this, ActivateSound, GetActorLocation());
-		
 		if (const IGameModeInterface* GameModeInterface = Cast<IGameModeInterface>(UGameplayStatics::GetGameMode(this)))
 		{
 			const UWorld* World = GetWorld();

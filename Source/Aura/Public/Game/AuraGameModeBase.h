@@ -15,7 +15,7 @@ class ULevelUpInfo;
 class UCharacterClassInfo;
 class AAuraPlayerController;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FPlayerDiedSignature, const ACharacter*)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPlayerDiedSignature, const ACharacter*, DeadCharacter);
 /**
  * 
  */
@@ -81,6 +81,7 @@ public:
 
 	void RestartLevel(const ACharacter* PlayerCharacter) const;
 
+	UPROPERTY(BlueprintAssignable)
 	FPlayerDiedSignature OnPlayerDied;
 protected:
 	virtual void BeginPlay() override;
