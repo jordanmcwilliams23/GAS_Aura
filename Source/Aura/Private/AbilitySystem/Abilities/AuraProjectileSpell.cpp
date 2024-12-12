@@ -99,6 +99,12 @@ void UAuraProjectileSpell::SpawnProjectiles(const FVector& TargetLocation, const
 			Projectile->HomingTargetSceneComponent->SetWorldLocation(TargetLocation);
 			Projectile->ProjectileMovement->HomingTargetComponent = Projectile->HomingTargetSceneComponent;
 		}
+		if (bIsRadialDamage)
+		{
+			Projectile->bRadialDamage = bIsRadialDamage;
+			Projectile->RadialDamageInnerRadius = RadialDamageInnerRadius;
+			Projectile->RadialDamageOuterRadius = RadialDamageOuterRadius;
+		}
 		Projectile->ProjectileMovement->HomingAccelerationMagnitude = FMath::RandRange(HomingAccelerationMin, HomingAccelerationMax);
 		Projectile->ProjectileMovement->bIsHomingProjectile = bHomingProjectiles;
 		Projectile->FinishSpawning(SpawnTransform);

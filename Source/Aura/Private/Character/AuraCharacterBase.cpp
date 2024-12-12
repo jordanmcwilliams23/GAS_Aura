@@ -134,9 +134,9 @@ void AAuraCharacterBase::BurnTagChanged(const FGameplayTag CallbackTag, int32 Ne
 		UDebuffNiagaraComponent* BurnDebuffComponent = NewObject<UDebuffNiagaraComponent>(this);
 		BurnDebuffComponent->SetupAttachment(GetRootComponent());
 		BurnDebuffComponent->SetAsset(BurnNiagaraSystemClass);
-		BurnDebuffComponent->RegisterComponent();
 		BurnDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Burn;
 		BurnDebuffComponent->SetupComponent();
+		BurnDebuffComponent->RegisterComponent();
 		BurnDebuffComponent->Activate();
 	}
 	else

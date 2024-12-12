@@ -74,19 +74,53 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 
 	if (HasAuthority())
 	{
-		if (UAbilitySystemComponent* OverlappedASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
+		if (bRadialDamage)
 		{
-			DamageEffectParams.TargetASC = OverlappedASC;
-			const FVector DeathImpulse = GetActorForwardVector() * DamageEffectParams.GetDeathImpulseMagnitude();
-			DamageEffectParams.DeathImpulse = DeathImpulse;
-			//Check for knockback
-			if (UAuraAbilitySystemLibrary::RNGRoll(DamageEffectParams.KnockbackChance))
+			TArray<AActor*> OverlappingActors;
+
+			IgnoreList.Empty();
+			IgnoreList.Add(GetOwner());
+			FVector Location = GetActorLocation();
+			UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(
+				this,
+				OverlappingActors,
+				IgnoreList,
+				RadialDamageOuterRadius,
+				Location);
+			for (AActor* Overlapped : OverlappingActors)
 			{
-				FRotator Rotation = GetActorRotation();
-				Rotation.Pitch = 45.f;
-				DamageEffectParams.KnockbackForce = Rotation.Vector() * DamageEffectParams.KnockbackMagnitude;
+				if (UAbilitySystemComponent* OverlappedASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Overlapped))
+				{
+					DamageEffectParams.TargetASC = OverlappedASC;
+					DamageEffectParams.RadialDamageOrigin = Location;
+					const FVector DeathImpulse = GetActorForwardVector() * DamageEffectParams.GetDeathImpulseMagnitude();
+					DamageEffectParams.DeathImpulse = DeathImpulse;
+					//Check for knockback
+					if (UAuraAbilitySystemLibrary::RNGRoll(DamageEffectParams.KnockbackChance))
+					{
+						FRotator Rotation = GetActorRotation();
+						Rotation.Pitch = 45.f;
+						DamageEffectParams.KnockbackForce = Rotation.Vector() * DamageEffectParams.KnockbackMagnitude;
+					}
+					UAuraAbilitySystemLibrary::ApplyDamageEffect(DamageEffectParams);
+				}
 			}
-			UAuraAbilitySystemLibrary::ApplyDamageEffect(DamageEffectParams);
+		} else
+		{
+			if (UAbilitySystemComponent* OverlappedASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
+			{
+				DamageEffectParams.TargetASC = OverlappedASC;
+				const FVector DeathImpulse = GetActorForwardVector() * DamageEffectParams.GetDeathImpulseMagnitude();
+				DamageEffectParams.DeathImpulse = DeathImpulse;
+				//Check for knockback
+				if (UAuraAbilitySystemLibrary::RNGRoll(DamageEffectParams.KnockbackChance))
+				{
+					FRotator Rotation = GetActorRotation();
+					Rotation.Pitch = 45.f;
+					DamageEffectParams.KnockbackForce = Rotation.Vector() * DamageEffectParams.KnockbackMagnitude;
+				}
+				UAuraAbilitySystemLibrary::ApplyDamageEffect(DamageEffectParams);
+			}
 		}
 		Destroy();
 	} else { bHit = true; }

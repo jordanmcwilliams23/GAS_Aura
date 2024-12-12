@@ -33,6 +33,15 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	TArray<AActor*> IgnoreList;
+	
+	UPROPERTY(EditAnywhere)
+	bool bRadialDamage = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Damage")
+	float RadialDamageInnerRadius = 0.f;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Damage")
+	float RadialDamageOuterRadius = 0.f;
 
 protected:
 	virtual void BeginPlay() override;
