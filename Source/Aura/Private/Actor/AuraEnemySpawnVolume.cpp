@@ -3,7 +3,9 @@
 
 #include "Actor/AuraEnemySpawnVolume.h"
 
-#include "LevelEditor.h"
+#if WITH_EDITOR
+	#include "LevelEditor.h"
+#endif
 #include "Actor/AuraEnemySpawnPoint.h"
 #include "Aura/AuraLogChannels.h"
 #include "Components/BoxComponent.h"

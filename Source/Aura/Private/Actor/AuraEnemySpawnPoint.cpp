@@ -2,15 +2,16 @@
 
 
 #include "Actor/AuraEnemySpawnPoint.h"
-
 #include "Aura/AuraLogChannels.h"
 #include "Character/AuraEnemy.h"
 #include "Components/BillboardComponent.h"
 
 AAuraEnemySpawnPoint::AAuraEnemySpawnPoint()
 {
+#if WITH_EDITOR
 	if (UnselectedTexture)
 		GetSpriteComponent()->SetSprite(UnselectedTexture);
+#endif
 }
 
 void AAuraEnemySpawnPoint::SpawnEnemy() const
@@ -32,6 +33,8 @@ void AAuraEnemySpawnPoint::SpawnEnemy() const
 
 void AAuraEnemySpawnPoint::SetSelected(const bool bSelected) const
 {
+#if WITH_EDITOR
 	if (IsValid(GetSpriteComponent()))
 		GetSpriteComponent()->SetSprite(bSelected ? SelectedTexture : UnselectedTexture);
+#endif
 }

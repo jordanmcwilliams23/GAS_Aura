@@ -25,6 +25,7 @@ AAuraProjectile::AAuraProjectile()
 	Sphere->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
 	Sphere->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
 	Sphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	Sphere->IgnoreActorWhenMoving(GetOwner(), true);
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("Projectile Movement");
 	ProjectileMovement->InitialSpeed = 550.f;
@@ -40,6 +41,7 @@ void AAuraProjectile::EmptyIgnoreList()
 void AAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+	Sphere->IgnoreActorWhenMoving(GetOwner(), true);
 	SetReplicateMovement(true);
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AAuraProjectile::OnSphereOverlap);
 	UGameplayStatics::SpawnSoundAttached(

@@ -98,20 +98,19 @@ FString AAuraGameModeBase::GetMapNameFromMapAssetName(const FString& InMapAssetN
 {
 	for (auto& Level : Levels)
 	{
-		if (Level.Value.ToSoftObjectPath().GetAssetName() == InMapAssetName) return Level.Key;
+		if (Level.Value.ToSoftObjectPath().GetAssetName() == InMapAssetName)
+		{
+			return Level.Key;
+		}
 	}
 	return FString();
 }
 
 void AAuraGameModeBase::TravelToMap(const UMVVM_LoadSlot* LoadSlot)
 {
+	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
+	AuraGameInstance->LevelName = LoadSlot->GetMapName();
 	UGameplayStatics::OpenLevelBySoftObjectPtr(LoadSlot, Levels.FindChecked(LoadSlot->GetMapName()));
-}
-
-void AAuraGameModeBase::TravelToMapStreaming(const FName& MapName) const
-{
-	const FLatentActionInfo LatentInfo;
-	UGameplayStatics::LoadStreamLevel(this, MapName, true, true, LatentInfo);
 }
 
 AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
@@ -154,7 +153,6 @@ void AAuraGameModeBase::SaveInGameProgressData(ULoadScreenSaveGame* SaveObject) 
 	const FString InGameLoadSlotName = AuraGameInstance->LoadSlotName;
 	const int32 InGameLoadSlotIndex = AuraGameInstance->LoadSlotIndex;
 	AuraGameInstance->PlayerStartTag = SaveObject->PlayerStartTag;
-	
 	
 	UGameplayStatics::SaveGameToSlot(SaveObject, InGameLoadSlotName, InGameLoadSlotIndex);
 }

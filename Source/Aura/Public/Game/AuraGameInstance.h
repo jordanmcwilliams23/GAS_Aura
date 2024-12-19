@@ -28,6 +28,12 @@ public:
 
 	void LoadedWorld(UWorld* World);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void BlueprintLoadedWorld(UWorld* World);
+
+	UPROPERTY(BlueprintReadWrite)
+	FString LevelName;
+
 	UPROPERTY()
 	FVector InitialMoveToLocation = FVector::ZeroVector;
 };

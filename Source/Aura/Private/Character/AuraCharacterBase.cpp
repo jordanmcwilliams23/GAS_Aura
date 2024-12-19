@@ -2,6 +2,7 @@
 
 
 #include "Character/AuraCharacterBase.h"
+
 #include "AbilitySystemComponent.h"
 #include "AuraGameplayTags.h"
 #include "GameplayEffectTypes.h"
@@ -162,7 +163,11 @@ void AAuraCharacterBase::MulticastHandleDeath_Implementation(const FVector& Deat
 	UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation(), GetActorRotation());
 	bIsDead = true;
 
-	GetAbilitySystemComponent()->AddReplicatedLooseGameplayTag(FAuraGameplayTags::Get().Status_Dead);
+	//Death GE just applies Status.Dead tag 
+	check(DeathGameplayEffectClass);
+	FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
+	FGameplayEffectSpecHandle Spec = GetAbilitySystemComponent()->MakeOutgoingSpec( DeathGameplayEffectClass, 1, ContextHandle);
+	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToSelf(*Spec.Data);
 	
 	Weapon->SetSimulatePhysics(true);
 	Weapon->SetEnableGravity(true);
@@ -223,7 +228,7 @@ bool AAuraCharacterBase::IsBeingShocked_Implementation() const
 	return bIsBeingShocked;
 }
 
-void AAuraCharacterBase::SetBeingShocked_Implementation(const bool InBeingShocked)
+void AAuraCharacterBase::SetBeingShocked_Implementation(bool InBeingShocked)
 {
 	bIsBeingShocked = InBeingShocked;
 	GetCharacterMovement()->MaxWalkSpeed = bIsBeingShocked ? 0.f : BaseWalkSpeed;
@@ -232,6 +237,11 @@ void AAuraCharacterBase::SetBeingShocked_Implementation(const bool InBeingShocke
 FOnFloatChangedSignature& AAuraCharacterBase::GetOnDamageSignature()
 {
 	return OnDamageDelegate;
+}
+
+int AAuraCharacterBase::GetCCStacks_Implementation() const
+{
+	return CrowdControlStacks;
 }
 
 void AAuraCharacterBase::ApplyEffectToSelf(const TSubclassOf<UGameplayEffect> Effect, const float Level) const

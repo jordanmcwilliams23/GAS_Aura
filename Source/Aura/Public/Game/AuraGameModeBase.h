@@ -68,9 +68,7 @@ public:
 	FString GetMapNameFromMapAssetName(const FString& InMapAssetName) const;
 
 	void TravelToMap(const UMVVM_LoadSlot* LoadSlot);
-
-	void TravelToMapStreaming(const FName& MapName) const;
-
+	
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 
 	UPROPERTY(EditDefaultsOnly)

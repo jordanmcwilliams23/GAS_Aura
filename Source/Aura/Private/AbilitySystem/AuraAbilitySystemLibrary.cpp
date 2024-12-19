@@ -469,6 +469,33 @@ void UAuraAbilitySystemLibrary::GetClosestTargets(const int32 MaxTargets, const 
 		OutClosestTargets.Add(ActorsCopy[i]);
 }
 
+void UAuraAbilitySystemLibrary::GetClosestTargetsInSight(int32 MaxTargets, const TArray<AActor*> IgnoredActors, const TArray<AActor*>& Actors,
+	TArray<AActor*>& OutClosestTargets, const FVector& Origin)
+{
+	if (Actors.IsEmpty()) return;
+	TArray<AActor*> ValidActors;
+	UWorld* World = Actors[0]->GetWorld();
+	FHitResult OutHitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActors(IgnoredActors);
+	for (AActor* Actor : Actors)
+	{
+		World->LineTraceSingleByChannel(OutHitResult, Origin, Actor->GetActorLocation(), ECC_Visibility, Params);
+		if (OutHitResult.bBlockingHit)
+		{
+			if (OutHitResult.GetActor() == Actor)
+			{
+				ValidActors.Add(Actor);
+			}
+			/* if (GEngine)
+				GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::Emerald, FString::Printf(TEXT("Hit target: %s"), *OutHitResult.GetActor()->GetName())); */
+		}
+	}
+	
+	GetClosestTargets(MaxTargets, ValidActors, OutClosestTargets, Origin);
+}
+
+
 FVector UAuraAbilitySystemLibrary::GetCombatSocketLocation(const AAuraCharacterBase* Character, const FGameplayTag& Tag)
 {
 	const TMap<FGameplayTag, FName> TagToSocketMap = FAuraGameplayTags::Get().TagToSocketName;

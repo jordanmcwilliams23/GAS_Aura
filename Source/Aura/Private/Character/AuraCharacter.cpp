@@ -86,6 +86,7 @@ void AAuraCharacter::LoadProgress() const
 			if (UAuraAbilitySystemComponent* AuraASC = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
 			{
 				AuraASC->AddCharacterAbilitiesFromSaveData(SaveData);
+				AuraASC->AddCharacterPassiveAbilities(StartupPassiveAbilities);
 			}
 			
 			check(AuraPlayerState);

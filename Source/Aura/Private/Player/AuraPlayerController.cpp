@@ -332,7 +332,7 @@ void AAuraPlayerController::SyncOccludedActors()
 	    GetWorld(),
 	    Start,
 	    End,
-	    ActiveCapsuleComponent->GetScaledCapsuleRadius() * CapsulePercentageForTrace,
+	    ActiveCapsuleComponent->GetScaledCapsuleRadius() * CapsulePercentageForTrace * 2.f,
 	    ActiveCapsuleComponent->GetScaledCapsuleHalfHeight() * CapsulePercentageForTrace, CollisionObjectTypes, true,
 	    ActorsToIgnore,
 	    ShouldDebug,

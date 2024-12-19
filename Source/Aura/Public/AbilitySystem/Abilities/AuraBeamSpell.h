@@ -52,5 +52,8 @@ protected:
 	FName BeamStartSocketName = FName("TipSocket");
 
 	UPROPERTY(EditDefaultsOnly, Category = "Beam")
+	int32 BaseTargets = 1;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Beam")
 	int32 MaxNumTargets = 5;
 };

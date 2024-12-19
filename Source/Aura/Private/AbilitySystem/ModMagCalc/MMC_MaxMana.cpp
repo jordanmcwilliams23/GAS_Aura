@@ -27,5 +27,5 @@ float UMMC_MaxMana::CalculateBaseMagnitude_Implementation(const FGameplayEffectS
 	float Intelligence = 0.0f;
 	GetCapturedAttributeMagnitude(IntelligenceDef, Spec, EvaluateParameters, Intelligence);
 	Intelligence = FMath::Max<float>(Intelligence, 0.0f);
-	return 50.f + (Intelligence * 2.5f) + (Level * 15.f);
+	return BaseMana + (Intelligence * ManaMultiplierPerIntelligence) + (Level * ManaMultiplierPerLevel);
 }

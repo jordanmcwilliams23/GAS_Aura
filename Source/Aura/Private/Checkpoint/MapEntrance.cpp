@@ -8,6 +8,7 @@
 #include "AuraGameplayTags.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/SphereComponent.h"
+#include "Game/AuraGameInstance.h"
 #include "Game/AuraGameModeBase.h"
 #include "Interaction/GameModeInterface.h"
 #include "Interaction/PlayerInterface.h"
@@ -59,10 +60,6 @@ void AMapEntrance::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 			EndGameScreen(OtherActor);
 			return;
 		}
-		if (const IGameModeInterface* GameModeInterface = Cast<IGameModeInterface>(UGameplayStatics::GetGameMode(this)))
-		{
-			GameModeInterface->SaveWorldState(GetWorld(), DestinationMap.ToSoftObjectPath().GetAssetName());
-		}
 		IPlayerInterface::Execute_SaveProgress(OtherActor, DestinationPlayerStartTag);
 
 		/* if (DestinationMap == nullptr)
@@ -71,6 +68,15 @@ void AMapEntrance::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 				GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::Red, TEXT("Map Entrance doesn't have a destination map set!"));
 			return;
 		} */
+		if (AAuraGameModeBase* AuraGameModeBase = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(this)))
+		{
+			if (UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(AuraGameModeBase->GetGameInstance()))
+			{
+				AuraGameInstance->LevelName = AuraGameModeBase->GetMapNameFromMapAssetName(DestinationMap.GetAssetName());
+				AuraGameModeBase->SaveWorldState(GetWorld(), DestinationMap.ToSoftObjectPath().GetAssetName());
+			}
+		}
+		//test
 		UGameplayStatics::OpenLevelBySoftObjectPtr(this, DestinationMap);
 	}
 }

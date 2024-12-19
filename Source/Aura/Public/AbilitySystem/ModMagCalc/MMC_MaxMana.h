@@ -18,4 +18,10 @@ public:
 private:
 	FGameplayEffectAttributeCaptureDefinition IntelligenceDef;
 	virtual float CalculateBaseMagnitude_Implementation(const FGameplayEffectSpec& Spec) const override;
+
+	float BaseMana = 60.f;
+
+	float ManaMultiplierPerLevel = 20.f;
+	
+	float ManaMultiplierPerIntelligence = 3.f;
 };

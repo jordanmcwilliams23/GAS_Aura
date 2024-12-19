@@ -70,8 +70,8 @@ void UAuraBeamSpell::StoreAdditionalTargets(TArray<AActor*>& OutAdditionalTarget
 		ActorsToIgnore,
 		850.f,
 		MouseHitActor->GetActorLocation());
-	const int32 NumAdditionalTargets = FMath::Min(GetAbilityLevel() - 1, MaxNumTargets);
-	UAuraAbilitySystemLibrary::GetClosestTargets(NumAdditionalTargets, OverlappingActors, OutAdditionalTargets, MouseHitActor->GetActorLocation());
+	const int32 NumAdditionalTargets = BaseTargets + FMath::Min(GetAbilityLevel() - 1, MaxNumTargets);
+	UAuraAbilitySystemLibrary::GetClosestTargetsInSight(NumAdditionalTargets, ActorsToIgnore,OverlappingActors, OutAdditionalTargets, MouseHitActor->GetActorLocation());
 	for (AActor* Target : OutAdditionalTargets)
 	{
 		//if Target implements combat interface AND AdditionalTargetDied is not yet bound, bind it

@@ -47,7 +47,7 @@ public:
 	UPROPERTY(ReplicatedUsing=OnRep_Burning, BlueprintReadOnly)
 	bool bIsBurning = false;
 
-	UPROPERTY(Replicated, BlueprintReadOnly)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bIsBeingShocked = false;
 
 	UFUNCTION()
@@ -63,6 +63,7 @@ public:
 	float BaseWalkSpeed = 250.f;
 
 	void SetCharacterClass(const ECharacterClass InClass) { CharacterClass = InClass; }
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void InitAbilityActorInfo();
@@ -87,8 +88,9 @@ protected:
 	virtual FOnDeath& GetOnDeathDelegate() override;
 	virtual USkeletalMeshComponent* GetWeapon_Implementation() const override;
 	virtual bool IsBeingShocked_Implementation() const override;
-	virtual void SetBeingShocked_Implementation(const bool InBeingShocked) override;
+	virtual void SetBeingShocked_Implementation(bool InBeingShocked) override;
 	virtual FOnFloatChangedSignature& GetOnDamageSignature() override;
+	virtual int GetCCStacks_Implementation() const override;
 	/* End Combat Interface */
 	
 	UPROPERTY()
@@ -151,7 +153,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UNiagaraSystem> StunNiagaraSystemClass;
-private:
+
+	UPROPERTY(BlueprintReadWrite)
+	int CrowdControlStacks = 0;
+
 	UPROPERTY(EditAnywhere, Category="Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
 
@@ -160,4 +165,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="Abilities")
 	TObjectPtr<UAnimMontage> HitReactMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category="Abilities")
+	TSubclassOf<UGameplayEffect> DeathGameplayEffectClass;
 };

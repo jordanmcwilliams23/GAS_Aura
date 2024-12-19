@@ -160,7 +160,6 @@ void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 {
 	const float LocalIncomingDamage = GetIncomingDamage();
 	SetIncomingDamage(0.f);
-	const bool appliedDebuff = UAuraAbilitySystemLibrary::DidApplyDebuff(Props.EffectContextHandle);
 	if (UAuraAbilitySystemLibrary::DidApplyDebuff(Props.EffectContextHandle)) Debuff(Props);
 	if (LocalIncomingDamage <= 0.f)
 	{
@@ -173,7 +172,8 @@ void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 		//Check if should hit react and is not being shocked
 		if (UAuraAbilitySystemLibrary::GetShouldHitReact(Props.EffectContextHandle) &&
 			Props.TargetCharacter->Implements<UCombatInterface>() &&
-			!ICombatInterface::Execute_IsBeingShocked(Props.TargetCharacter))
+			!ICombatInterface::Execute_IsBeingShocked(Props.TargetCharacter) &&
+			ICombatInterface::Execute_CanBeCCed(Props.TargetCharacter))
 		{
 			//Hit React
 			Props.TargetASC->TryActivateAbilitiesByTag(FGameplayTagContainer(FAuraGameplayTags::Get().Abilities_HitReact));

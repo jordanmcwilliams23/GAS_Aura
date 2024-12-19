@@ -17,4 +17,5 @@ void UAuraGameInstance::LoadedWorld(UWorld* World)
 	AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetPrimaryPlayerController());
 	AuraPlayerController->CachedDestination = InitialMoveToLocation;
 	AuraPlayerController->BlockInputAndMoveToCachedDestination();
+	BlueprintLoadedWorld(World);
 }

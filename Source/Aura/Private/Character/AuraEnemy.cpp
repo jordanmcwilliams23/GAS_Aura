@@ -141,6 +141,11 @@ void AAuraEnemy::BeginPlay()
 	}
 }
 
+bool AAuraEnemy::CanBeCCed_Implementation() const
+{
+	return CrowdControlStacks < MaxCrowdControlStacks;
+}
+
 void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, const int32 NewCount)
 {
 	bHitReacting = NewCount > 0;

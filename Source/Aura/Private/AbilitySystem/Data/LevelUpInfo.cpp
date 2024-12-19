@@ -26,6 +26,10 @@ int32 ULevelUpInfo::FindLevelForXP(const int32 XP)
 
 bool ULevelUpInfo::CanLevelUp(const int32 Level, const int32 Experience)
 {
+	if (Level > LevelInfo.Num() - 1)
+	{
+		return false;
+	}
 	return LevelInfo[Level].LevelUpRequirement <= Experience;
 }
 

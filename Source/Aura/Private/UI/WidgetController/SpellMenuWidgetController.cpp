@@ -50,6 +50,12 @@ void USpellMenuWidgetController::EquipButtonPressed(const FGameplayTag& AbilityT
 bool USpellMenuWidgetController::GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag, FString& OutDescription,
                                                              FString& OutNextDescription)
 {
+	if (!AbilityTag.MatchesTag(FAuraGameplayTags::Get().Abilities))
+	{
+		OutDescription = FString("WIP");
+		OutNextDescription = FString("WIP");
+		return false;
+	}
 	return GetAuraASC()->GetDescriptionsByAbilityTag(AbilityTag, OutDescription, OutNextDescription);
 }
 

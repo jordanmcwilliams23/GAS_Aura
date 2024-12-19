@@ -182,6 +182,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")
 	static void GetClosestTargets(int32 MaxTargets, const TArray<AActor*>& Actors, TArray<AActor*>& OutClosestTargets, const FVector& Origin);
+
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")
+	static void GetClosestTargetsInSight(int32 MaxTargets, const TArray<AActor*> IgnoredActors, const TArray<AActor*>& Actors, TArray<AActor*>& OutClosestTargets, const FVector& Origin);
 	
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|Combat")
 	static FVector GetCombatSocketLocation(const AAuraCharacterBase* Character, const FGameplayTag& Tag);

@@ -94,7 +94,7 @@ public:
 	virtual FOnDeath& GetOnDeathDelegate() = 0;
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void SetInShockLoop(const bool InLoop);
+	void SetInShockLoop(bool InLoop);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	bool IsBeingShocked() const;
@@ -112,4 +112,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	bool IsChampion() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	int GetCCStacks() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void AddCCStacks(const int Stacks);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	bool CanBeCCed() const;
 };

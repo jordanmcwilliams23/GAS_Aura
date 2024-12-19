@@ -43,6 +43,7 @@ public:
 	virtual void Die(const FVector& DeathImpulse) override;
 	virtual void ReceivedDamage_Implementation(const float Damage) override;
 	virtual bool IsChampion_Implementation() const override { return bIsChampion; }
+	virtual bool CanBeCCed_Implementation() const override;
 	/* End Combat Interface */
 
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
@@ -95,7 +96,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="AI")
 	TObjectPtr<UBehaviorTree> BehaviorTree;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AAuraAIController> AuraAIController;
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -126,6 +127,9 @@ protected:
 	void Split(AActor* DeadCharacter);
 
 	void SetupChampion(const FChampionInformation& ChampionInfo);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	int MaxCrowdControlStacks = 4;
 private:
 	
 	UPROPERTY(EditDefaultsOnly)

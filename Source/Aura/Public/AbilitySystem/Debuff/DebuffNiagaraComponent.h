@@ -29,4 +29,6 @@ public:
 protected:
 	UFUNCTION()
 	void OnOwnerDeath(AActor* Character);
+
+	FDelegateHandle ActivateDelegateHandle;
 };

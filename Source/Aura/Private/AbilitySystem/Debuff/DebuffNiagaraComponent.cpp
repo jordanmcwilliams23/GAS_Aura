@@ -17,6 +17,9 @@ void UDebuffNiagaraComponent::OnOwnerDeath(AActor* Character) { Deactivate(); }
 
 void UDebuffNiagaraComponent::Deactivate()
 {
+	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner());
+	if (ActivateDelegateHandle.IsValid())
+		ASC->RegisterGameplayTagEvent(DebuffTag, EGameplayTagEventType::NewOrRemoved).Remove(ActivateDelegateHandle);
 	Super::Deactivate();
 	DestroyComponent();
 }
@@ -28,7 +31,7 @@ void UDebuffNiagaraComponent::SetupComponent()
 	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner());
 	if (ASC)
 	{
-		ASC->RegisterGameplayTagEvent(DebuffTag, EGameplayTagEventType::NewOrRemoved).AddLambda(
+		ActivateDelegateHandle = ASC->RegisterGameplayTagEvent(DebuffTag, EGameplayTagEventType::NewOrRemoved).AddLambda(
 		[this](const FGameplayTag CallbackTag, const int32 NewCount)
 		{
 			if (!IsValid(this)) return;
@@ -38,7 +41,7 @@ void UDebuffNiagaraComponent::SetupComponent()
 	{
 		CombatInterface->GetOnASCRegisteredDelegate().AddWeakLambda(this, [this](UAbilitySystemComponent* InASC)
 		{
-			InASC->RegisterGameplayTagEvent(DebuffTag, EGameplayTagEventType::NewOrRemoved).AddLambda(
+			ActivateDelegateHandle = InASC->RegisterGameplayTagEvent(DebuffTag, EGameplayTagEventType::NewOrRemoved).AddLambda(
 		[this](const FGameplayTag CallbackTag, const int32 NewCount)
 			{
 				if (!IsValid(this)) return;
